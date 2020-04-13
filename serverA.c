@@ -12,7 +12,7 @@
 #define BACKLOG 10
 #define MAXROW 50
 
-char matrix[MAXROW][3][150];
+float matrix[MAXROW][3];
 int len = 0;
 
 
@@ -43,20 +43,20 @@ void readValues(FILE *fp){
             }
             else {
                 i++;
-                char *token_one, *token_two, *token_three;
+                float token_one, token_two, token_three;
                 const char delimiterAgain[2] = " ";
 
-                token_one = strtok(line, delimiterAgain);
-                printf("%s\t", token_one);
+                token_one = atof(strtok(line, delimiterAgain));
+                //printf("%f\t", token_one);
 
-                token_two = strtok(NULL, delimiterAgain);
-                printf("%s\t", token_two);
+                token_two = atof(strtok(NULL, delimiterAgain));
+                //printf("%f\t", token_two);
 
-                token_three = strtok(NULL, delimiterAgain);
-                printf("%s\n", token_three);
-                strcpy(matrix[i][0], token_one);
-                strcpy(matrix[i][1], token_two);
-                strcpy(matrix[i][2], token_three);
+                token_three = atof(strtok(NULL, delimiterAgain));
+                //printf("%f\n", token_three);
+                matrix[i][0] = token_one;
+                matrix[i][1] = token_two;
+                matrix[i][2] = token_three;
                 len = i;
 
             }
@@ -109,7 +109,7 @@ int main(){
     
 	printf( "The Server A is up and running using UDP on port %s.\n", SERVERAPORT);
     
-
+    
     while(1){
         addr_len = sizeof server_addr;
         char val1[15];
@@ -120,6 +120,7 @@ int main(){
         memset(msg, 'N', strlen(msg));
         char map_id[2];
         memset(map_id, '0', strlen(map_id));
+        //int len = 0;
 
         int numbytes = recvfrom(socket_fd, map_id, sizeof map_id , 0,(struct sockaddr *)&server_addr, &addr_len);
         if(numbytes == -1){
@@ -156,16 +157,21 @@ int main(){
         
         fclose(fp);
 
-        int j, k;
-        int l = sizeof(matrix);
-        // printf("%d\n", len);
-        for(j=0 ; j<len;j++){
-            for(k=0;k<3;k++){
-                printf("%s\t", matrix[j][k]);
-            }
-        printf("\n");
-        }
+        // int j, k;
+        // int l = sizeof(matrix);
+        printf("len::::%d\n", len);
+        // for(j=0 ; j<len;j++){
+        //     for(k=0;k<3;k++){
+        //         printf("%f\t", matrix[j][k]);
+        //     }
+        // printf("\n");
+        // }
         if ((numbytes = sendto(socket_fd, &msg, sizeof(val1), 0,	
+            (struct sockaddr *)&server_addr, addr_len)) == -1) {
+			perror("senderr: sendto");
+			exit(1);
+		}
+        if ((numbytes = sendto(socket_fd, &len, sizeof(len), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");
 			exit(1);
@@ -186,8 +192,13 @@ int main(){
 			perror("senderr: sendto");
 			exit(1);
 		}
-
-printf("The server sent graph to aws.\n");
+        if(msg[0] == 'N'){
+            printf("The Server A does not have required graph id.\n");
+            printf("The Server A has sent \"Graph not found\" to AWS.\n");
+        }else{
+            printf("The Server A sent Graph to AWS.\n");
+        }
+        
     
        
         

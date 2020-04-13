@@ -186,7 +186,12 @@ int main(){
 			exit(1);
 		}
 
-printf("The server B sent graph to aws.\n");
+        if(msg[0] == 'N'){
+            printf("The Server B does not have required graph id");
+            printf("The Server B has sent \"Graph not found\" to AWS");
+        }else{
+            printf("The Server B sent Graph to AWS.\n");
+        }
     
        
         

@@ -52,6 +52,29 @@ void sendData(char map_id[], char src_vertex_index[], char dest_vertex_index[], 
 	
 }
 
+int findVertex(float matrix [MAXROW][3], int len, int src_vertex_index, int dest_vertex_index){
+	int j, k;
+	// int len = sizeof(matrix[0])/sizeof(matrix[0][0]);
+	printf("lalalal%d\n", len);
+	int srcFound = 0;
+	int destFound = 0;
+	for(j=0 ; j<len;j++){
+		for(k=0;k<2;k++){
+			printf("%f\t", matrix[j][k]);
+			if(src_vertex_index == (int)matrix[j][k] ){
+				srcFound = 1;
+			}
+			if(dest_vertex_index == (int)matrix[j][k]){
+				destFound = 1;
+			}
+		}
+	printf("\n");
+	}
+	if(srcFound == 1 && destFound == 1){
+		return 1;
+	}
+}
+
 
 
 int main(int argc, char* argv[]){
@@ -226,6 +249,7 @@ int main(int argc, char* argv[]){
 		
 		//send map is to server A
 		int numbytes;
+		int found;
 		if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
 				 udp_A_p->ai_addr, udp_A_p->ai_addrlen)) == -1) {
 				perror("talker: sendto");
@@ -233,7 +257,8 @@ int main(int argc, char* argv[]){
 			}
 		printf("The AWS sent <%s> to Backend-Server A\n", map_id);
 
-		char matrix[MAXROW][3][150];
+		float matrix[MAXROW][3];
+		memset(matrix, 0.0, sizeof(matrix));
 
 		char val1[150];
 		memset(val1, '0', strlen(val1));
@@ -244,8 +269,16 @@ int main(int argc, char* argv[]){
 		char msg[2];
 		memset(msg, 'N', strlen(msg));
 
+		int lenOfMatrix = 0;
+
 		udp_addr_len = sizeof udp_their_addr;
 		if ((numbytes = recvfrom(udp_sockfd, &msg, sizeof(val1) , 0,			//wait for the incoming packets
+			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+				perror("recvfrom");
+				exit(1);
+		}
+
+		if ((numbytes = recvfrom(udp_sockfd, &lenOfMatrix, sizeof(lenOfMatrix) , 0,			//wait for the incoming packets
 			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
 				perror("recvfrom");
 				exit(1);
@@ -281,6 +314,7 @@ int main(int argc, char* argv[]){
 				perror("recvfrom");
 				exit(1);
 			}
+
 			if ((numbytes = recvfrom(udp_sockfd, &val1, sizeof(val1) , 0,			//wait for the incoming packets
 			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
 				perror("recvfrom");
@@ -298,14 +332,29 @@ int main(int argc, char* argv[]){
 			}
 			if(val1[0] == '0'){
 				printf("Not found from server B As well \n");
+				//return the message back to client
 			}else{
-				printf("Received from ServerB %s \n", val1);
+				printf("AWS has received map information from server B %s \n", val1);
+				found = findVertex(matrix, lenOfMatrix, atoi(src_vertex_index), atoi(dest_vertex_index));
 			}
-		}else{
-			printf("Received from ServerA %s \n", val1);
-		}
+			}else{
+				printf("AWS has received map information from server A %s \n", val1);
+				found = findVertex(matrix, lenOfMatrix,  atoi(src_vertex_index), atoi(dest_vertex_index));
+			}
 
-		
+		if(found == 1){
+			printf("The source and destination vertex are in the graph");
+			//send data to server C
+		// 	if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
+		// 		 udp_C_p->ai_addr, udp_C_p->ai_addrlen)) == -1) {
+		// 		perror("talker: sendto");
+		// 		exit(1);
+		// 	}
+		// printf("The AWS sent <%s> to Backend-Server C\n", map_id);
+		}else{
+			printf("The source and destination vertex are not found in the graph, sending error to client using TCP over PORT %d", client_port);
+			//send message to client
+		}
 		printf("End %s\n",msg);
 		
 
