@@ -16,9 +16,11 @@
 int main(int argc, char* argv[]){
 
     char map_id[2];
-    char src_vertex_index[2];
-    char dest_vertex_index[2];
+    char src_vertex_index[3];
+    char dest_vertex_index[3];
     char file_size[20];
+	char receiveMsg[150];
+	memset(receiveMsg, '$', strlen(receiveMsg));
 
 	strcpy(map_id,argv[1]);
     strcpy(src_vertex_index,argv[2]);
@@ -68,9 +70,18 @@ if (p == NULL) {
     send(socket_fd, src_vertex_index, sizeof src_vertex_index, 0);
     send(socket_fd, dest_vertex_index, sizeof dest_vertex_index, 0);
     send(socket_fd, file_size, sizeof file_size, 0);
-    //printf("%s client", src_vertex_index);
+    
 	printf("The client has sent query to AWS using TCP: start vertex %s; destination vertex %s;map %s;file size %s.\n",src_vertex_index,
 	 	dest_vertex_index, map_id, file_size);
+	printf("before:::%s", receiveMsg);
+	int numbytes = recv(socket_fd, &receiveMsg,sizeof(receiveMsg), 0);
+	if(numbytes == -1){
+		perror("recv:client");
+		exit(1);
+	}
+
+	printf("Message received from AWS.%s \n", receiveMsg);
+	close(socket_fd);
 
      
     return 0;

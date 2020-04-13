@@ -24,55 +24,60 @@ void *get_in_addr(struct sockaddr *sa)
     }
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
-void sendData(char map_id[], char src_vertex_index[], char dest_vertex_index[], char file_size[]){
-	printf("Hello %s \n", map_id);
-	printf("Hello %s \n", src_vertex_index);
-	printf("Hello %s \n", dest_vertex_index);
-	//printf("Hello %s \n", file_size);
-	int my_sock;
-	struct addrinfo hints, *servinfo, *p;
-    int rv;
-	memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC; // set to AF_INET to force IPv4
-    hints.ai_socktype = SOCK_DGRAM;
-	//printf("Hello %s \n", file_size);
-	if ((rv = getaddrinfo(HOST, UDPPORT, &hints, &servinfo))!= 0) {
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-		return;
-	}
-	//printf("Hellosasas %s \n", file_size);
-	for (p = servinfo; p != NULL; p = p->ai_next) {
-		if ((my_sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-			perror("talker: socket");
-			continue;
-		}
-		break;
-	}
-	//printf("Hellortrt %s \n", file_size);
+// void sendData(char map_id[], char src_vertex_index[], char dest_vertex_index[], char file_size[]){
+// 	printf("Hello %s \n", map_id);
+// 	printf("Hello %s \n", src_vertex_index);
+// 	printf("Hello %s \n", dest_vertex_index);
+// 	//printf("Hello %s \n", file_size);
+// 	int my_sock;
+// 	struct addrinfo hints, *servinfo, *p;
+//     int rv;
+// 	memset(&hints, 0, sizeof hints);
+//     hints.ai_family = AF_UNSPEC; // set to AF_INET to force IPv4
+//     hints.ai_socktype = SOCK_DGRAM;
+// 	//printf("Hello %s \n", file_size);
+// 	if ((rv = getaddrinfo(HOST, UDPPORT, &hints, &servinfo))!= 0) {
+// 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+// 		return;
+// 	}
+// 	//printf("Hellosasas %s \n", file_size);
+// 	for (p = servinfo; p != NULL; p = p->ai_next) {
+// 		if ((my_sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+// 			perror("talker: socket");
+// 			continue;
+// 		}
+// 		break;
+// 	}
+// 	//printf("Hellortrt %s \n", file_size);
 	
-}
+// }
 
-int findVertex(float matrix [MAXROW][3], int len, int src_vertex_index, int dest_vertex_index){
+void findVertex(int *vertex, float matrix [MAXROW][3], int len, int src_vertex_index, int dest_vertex_index){
 	int j, k;
-	// int len = sizeof(matrix[0])/sizeof(matrix[0][0]);
-	printf("lalalal%d\n", len);
+	
 	int srcFound = 0;
 	int destFound = 0;
+	// printf("src_vertex_index:%d", src_vertex_index);
+	// printf("dest_vertex_index:%d", dest_vertex_index);
 	for(j=0 ; j<len;j++){
 		for(k=0;k<2;k++){
-			printf("%f\t", matrix[j][k]);
+			
 			if(src_vertex_index == (int)matrix[j][k] ){
 				srcFound = 1;
+				vertex[0] = 1;
+				printf("Found src \n");
 			}
 			if(dest_vertex_index == (int)matrix[j][k]){
 				destFound = 1;
+				vertex[1] = 1;
+				printf("Dest found \n");
 			}
 		}
-	printf("\n");
 	}
-	if(srcFound == 1 && destFound == 1){
-		return 1;
-	}
+	// if(srcFound == 1 && destFound == 1){
+	// 	return 1;
+	// }
+	return;
 }
 
 
@@ -232,10 +237,10 @@ int main(int argc, char* argv[]){
 		char map_id[2];
 		memset(map_id, '0', strlen(map_id));
 
-		char src_vertex_index[2];
+		char src_vertex_index[3];
 		memset(src_vertex_index, '0', strlen(src_vertex_index));
 
-    	char dest_vertex_index[2];
+    	char dest_vertex_index[3];
 		memset(dest_vertex_index, '0', strlen(dest_vertex_index));
 
     	char file_size[20];
@@ -249,7 +254,8 @@ int main(int argc, char* argv[]){
 		
 		//send map is to server A
 		int numbytes;
-		int found;
+		int found[2];
+		memset(found, 0, sizeof(found));
 		if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
 				 udp_A_p->ai_addr, udp_A_p->ai_addrlen)) == -1) {
 				perror("talker: sendto");
@@ -270,6 +276,9 @@ int main(int argc, char* argv[]){
 		memset(msg, 'N', strlen(msg));
 
 		int lenOfMatrix = 0;
+
+		int vertex[2];
+		memset(vertex, 0, sizeof(vertex));
 
 		udp_addr_len = sizeof udp_their_addr;
 		if ((numbytes = recvfrom(udp_sockfd, &msg, sizeof(val1) , 0,			//wait for the incoming packets
@@ -299,6 +308,7 @@ int main(int argc, char* argv[]){
 				perror("recvfrom");
 				exit(1);
 		}
+		printf("beforesrc:%d, dest:%d\n",found[0], found[1]);
 		if(val1[0] == '0'){
 			printf("Not found from server A \n");
 			//send to server B
@@ -330,19 +340,32 @@ int main(int argc, char* argv[]){
 					perror("recvfrom");
 					exit(1);
 			}
+
+			
 			if(val1[0] == '0'){
-				printf("Not found from server B As well \n");
 				//return the message back to client
+				printf("Not found from server B As well \n");
+				if(send(child_fd, map_id, sizeof(src_vertex_index), 0 )== -1){
+					perror("send:aws");
+				}else{
+					close(child_fd);
+					exit(0);
+					
+				}
+				
 			}else{
 				printf("AWS has received map information from server B %s \n", val1);
-				found = findVertex(matrix, lenOfMatrix, atoi(src_vertex_index), atoi(dest_vertex_index));
+				
+				findVertex(vertex, matrix, lenOfMatrix, atoi(src_vertex_index), atoi(dest_vertex_index));
 			}
 			}else{
+				//printf("340 dest ::%s", dest_vertex_index);
 				printf("AWS has received map information from server A %s \n", val1);
-				found = findVertex(matrix, lenOfMatrix,  atoi(src_vertex_index), atoi(dest_vertex_index));
+				findVertex(vertex, matrix, lenOfMatrix,  atoi(src_vertex_index), atoi(dest_vertex_index));
 			}
-
-		if(found == 1){
+		printf("src:%d, dest:%d\n",vertex[0], vertex[1]);
+		
+		if(vertex[0] == 1 && vertex[1] == 1){
 			printf("The source and destination vertex are in the graph");
 			//send data to server C
 		// 	if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
@@ -351,9 +374,28 @@ int main(int argc, char* argv[]){
 		// 		exit(1);
 		// 	}
 		// printf("The AWS sent <%s> to Backend-Server C\n", map_id);
+		}else if(vertex[0]==0){
+			printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d", src_vertex_index, client_port);
+			if(send(child_fd, src_vertex_index, sizeof(src_vertex_index), 0 )== -1){
+					perror("send:aws");
+				}else{
+					close(child_fd);
+					exit(0);
+					
+				}
+		}else if (vertex[1]==0){
+			printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d", dest_vertex_index, client_port);
+			if(send(child_fd, dest_vertex_index, sizeof(dest_vertex_index), 0 )== -1){
+					perror("send:aws");
+				}else{
+					close(child_fd);
+					exit(0);
+					
+				}
 		}else{
 			printf("The source and destination vertex are not found in the graph, sending error to client using TCP over PORT %d", client_port);
 			//send message to client
+			
 		}
 		printf("End %s\n",msg);
 		
