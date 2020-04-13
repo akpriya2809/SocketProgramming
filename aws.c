@@ -207,9 +207,17 @@ int main(int argc, char* argv[]){
 		int client_port = addrPeer.sin_port;
 
 		char map_id[2];
+		memset(map_id, '0', strlen(map_id));
+
 		char src_vertex_index[2];
+		memset(src_vertex_index, '0', strlen(src_vertex_index));
+
     	char dest_vertex_index[2];
+		memset(dest_vertex_index, '0', strlen(dest_vertex_index));
+
     	char file_size[20];
+		memset(file_size, '0', strlen(file_size));
+
 		recv(child_fd, map_id, sizeof map_id, 0);	
 		recv(child_fd, src_vertex_index, sizeof src_vertex_index, 0);	
 		recv(child_fd, dest_vertex_index, sizeof dest_vertex_index, 0);	
@@ -225,9 +233,11 @@ int main(int argc, char* argv[]){
 			}
 		printf("The AWS sent <%s> to Backend-Server A\n", map_id);
 
-		char matrix[MAXROW][3];
+		char matrix[MAXROW][3][150];
+
 		char val1[150];
 		memset(val1, '0', strlen(val1));
+
 		char val2[150];
 		memset(val2, '0', strlen(val2));
 
@@ -240,7 +250,7 @@ int main(int argc, char* argv[]){
 				perror("recvfrom");
 				exit(1);
 		}
-
+		
 		if ((numbytes = recvfrom(udp_sockfd, &val1, sizeof(val1) , 0,			//wait for the incoming packets
 			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
 				perror("recvfrom");
@@ -257,15 +267,35 @@ int main(int argc, char* argv[]){
 				exit(1);
 		}
 		if(val1[0] == '0'){
-			printf("Not found from server A\n");
+			printf("Not found from server A \n");
 			//send to server B
 			if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
 				 udp_B_p->ai_addr, udp_B_p->ai_addrlen)) == -1) {
 				perror("talker: sendto");
 				exit(1);
 			}
-		printf("The AWS sent <%s> to Backend-Server B\n", map_id);
+			printf("The AWS sent <%s> to Backend-Server B\n", map_id);
 			
+			if ((numbytes = recvfrom(udp_sockfd, &msg, sizeof(val1) , 0,			//wait for the incoming packets
+			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+				perror("recvfrom");
+				exit(1);
+			}
+			if ((numbytes = recvfrom(udp_sockfd, &val1, sizeof(val1) , 0,			//wait for the incoming packets
+			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+				perror("recvfrom");
+				exit(1);
+			}
+			if ((numbytes = recvfrom(udp_sockfd, &val2, sizeof(val2) , 0,			//wait for the incoming packets
+				(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+					perror("recvfrom");
+					exit(1);
+			}
+			if ((numbytes = recvfrom(udp_sockfd, &matrix, sizeof(matrix) , 0,			//wait for the incoming packets
+				(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+					perror("recvfrom");
+					exit(1);
+			}
 			if(val1[0] == '0'){
 				printf("Not found from server B As well \n");
 			}else{
@@ -276,7 +306,7 @@ int main(int argc, char* argv[]){
 		}
 
 		
-		printf("End %s\n",val1);
+		printf("End %s\n",msg);
 		
 
 

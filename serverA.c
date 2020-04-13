@@ -47,13 +47,13 @@ void readValues(FILE *fp){
                 const char delimiterAgain[2] = " ";
 
                 token_one = strtok(line, delimiterAgain);
-                //printf("%s\t", token_one);
+                printf("%s\t", token_one);
 
                 token_two = strtok(NULL, delimiterAgain);
-                //printf("%s\t", token_two);
+                printf("%s\t", token_two);
 
                 token_three = strtok(NULL, delimiterAgain);
-                //printf("%s\n", token_three);
+                printf("%s\n", token_three);
                 strcpy(matrix[i][0], token_one);
                 strcpy(matrix[i][1], token_two);
                 strcpy(matrix[i][2], token_three);
@@ -120,6 +120,7 @@ int main(){
         memset(msg, 'N', strlen(msg));
         char map_id[2];
         memset(map_id, '0', strlen(map_id));
+
         int numbytes = recvfrom(socket_fd, map_id, sizeof map_id , 0,(struct sockaddr *)&server_addr, &addr_len);
         if(numbytes == -1){
             perror("receive:from");
@@ -139,14 +140,14 @@ int main(){
            
 
             if(compareLine(buf, map_id)) {
-                msg[0] = 'F';
+                msg[0] = 'A';
                 printf("%s\n", buf);
                
                 fgets(val1, 15, fp);
                 printf("Value1: %s\n", val1);
 
                 fgets(val2, 150, fp);
-                printf("Value1: %s\n", val2);
+                printf("Value2: %s\n", val2);
                 
                 readValues(fp);
                 break;
@@ -158,12 +159,12 @@ int main(){
         int j, k;
         int l = sizeof(matrix);
         // printf("%d\n", len);
-        // for(j=0 ; j<len;j++){
-        //     for(k=0;k<3;k++){
-        //         printf("%s\t", matrix[j][k]);
-        //     }
-        // printf("\n");
-        //}
+        for(j=0 ; j<len;j++){
+            for(k=0;k<3;k++){
+                printf("%s\t", matrix[j][k]);
+            }
+        printf("\n");
+        }
         if ((numbytes = sendto(socket_fd, &msg, sizeof(val1), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");
