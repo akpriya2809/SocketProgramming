@@ -48,27 +48,7 @@ void sendData(char map_id[], char src_vertex_index[], char dest_vertex_index[], 
 		}
 		break;
 	}
-	printf("Hellortrt %s \n", file_size);
-	// //sendto(my_sock, map_id, sizeof map_id, 0, p->ai_addr,p->ai_addrlen);
-	// //printf("pate ki jagah pahuch gye");
-	// if (p == NULL) {
-	// 	fprintf(stderr, "talker: failed to bind socket\n");
-	// 	return;
-	// }
-
-	// struct addrinfo udp_A_hints, *udp_A_servinfo, *udp_A_p;
-	// int udp_A_rv;
-
-	// memset(&udp_A_hints, 0, sizeof udp_A_hints);
-	// udp_A_hints.ai_family = AF_UNSPEC;
-	// udp_A_hints.ai_socktype = SOCK_DGRAM;
-
-	// if ((udp_A_rv = getaddrinfo("127.0.0.1", PORTA, &udp_A_hints, &udp_A_servinfo)) != 0) {	// server port is defined, the hostname should be 127.0.0.1
-	// 	fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(udp_A_rv));
-	// 	return 1;
-	// }
-
-	// udp_A_p = udp_A_servinfo;
+	//printf("Hellortrt %s \n", file_size);
 	
 }
 
@@ -247,8 +227,20 @@ int main(int argc, char* argv[]){
 
 		char matrix[MAXROW][3];
 		char val1[150];
+		memset(val1, '0', strlen(val1));
 		char val2[150];
+		memset(val2, '0', strlen(val2));
+
+		char msg[2];
+		memset(msg, 'N', strlen(msg));
+
 		udp_addr_len = sizeof udp_their_addr;
+		if ((numbytes = recvfrom(udp_sockfd, &msg, sizeof(val1) , 0,			//wait for the incoming packets
+			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+				perror("recvfrom");
+				exit(1);
+		}
+
 		if ((numbytes = recvfrom(udp_sockfd, &val1, sizeof(val1) , 0,			//wait for the incoming packets
 			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
 				perror("recvfrom");
@@ -264,7 +256,28 @@ int main(int argc, char* argv[]){
 				perror("recvfrom");
 				exit(1);
 		}
-		printf("Received from ServerA %s  %s", val1, val2);
+		if(val1[0] == '0'){
+			printf("Not found from server A\n");
+			//send to server B
+			if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
+				 udp_B_p->ai_addr, udp_B_p->ai_addrlen)) == -1) {
+				perror("talker: sendto");
+				exit(1);
+			}
+		printf("The AWS sent <%s> to Backend-Server B\n", map_id);
+			
+			if(val1[0] == '0'){
+				printf("Not found from server B As well \n");
+			}else{
+				printf("Received from ServerB %s \n", val1);
+			}
+		}else{
+			printf("Received from ServerA %s \n", val1);
+		}
+
+		
+		printf("End %s\n",val1);
+		
 
 
     }

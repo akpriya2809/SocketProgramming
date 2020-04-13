@@ -108,29 +108,38 @@ int main(){
     freeaddrinfo(servinfo);
     
 	printf( "The Server A is up and running using UDP on port %s.\n", SERVERAPORT);
-    char val1[15];
-    char val2[15];
+    
+
     while(1){
         addr_len = sizeof server_addr;
+        char val1[15];
+        memset(val1, '0', strlen(val1));
+        char val2[15];
+        memset(val2, '0', strlen(val2));
+        char msg[2];
+        memset(msg, 'N', strlen(msg));
         char map_id[2];
+        memset(map_id, '0', strlen(map_id));
         int numbytes = recvfrom(socket_fd, map_id, sizeof map_id , 0,(struct sockaddr *)&server_addr, &addr_len);
         if(numbytes == -1){
             perror("receive:from");
             exit(1);
         }
-        printf("The Server A has received input for finding finding graph of map %s . \n", map_id);
+        printf("The Server A has received input for finding graph of map %s . \n", map_id);
         //search map id from Map1.txt
         char buf[255];
-        
+        memset(buf, '0', strlen(buf));
         FILE *fp;
         fp = fopen("text.txt", "r");
         int i = 0;
+        
         while (1) {
             if (fgets(buf,150, fp) == NULL) 
                 break; 
            
 
             if(compareLine(buf, map_id)) {
+                msg[0] = 'F';
                 printf("%s\n", buf);
                
                 fgets(val1, 15, fp);
@@ -155,6 +164,11 @@ int main(){
         //     }
         // printf("\n");
         //}
+        if ((numbytes = sendto(socket_fd, &msg, sizeof(val1), 0,	
+            (struct sockaddr *)&server_addr, addr_len)) == -1) {
+			perror("senderr: sendto");
+			exit(1);
+		}
         if ((numbytes = sendto(socket_fd, &val1, sizeof(val1), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");
@@ -166,7 +180,7 @@ int main(){
 			exit(1);
 		}
         
-if ((numbytes = sendto(socket_fd, &matrix, sizeof(matrix), 0,	
+        if ((numbytes = sendto(socket_fd, &matrix, sizeof(matrix), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");
 			exit(1);
