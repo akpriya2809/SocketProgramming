@@ -109,7 +109,7 @@ int main(){
     
 	printf( "The Server A is up and running using UDP on port %s.\n", SERVERAPORT);
     
-    
+
     while(1){
         addr_len = sizeof server_addr;
         char val1[15];
@@ -120,7 +120,6 @@ int main(){
         memset(msg, 'N', strlen(msg));
         char map_id[2];
         memset(map_id, '0', strlen(map_id));
-        //int len = 0;
 
         int numbytes = recvfrom(socket_fd, map_id, sizeof map_id , 0,(struct sockaddr *)&server_addr, &addr_len);
         if(numbytes == -1){

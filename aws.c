@@ -24,44 +24,17 @@ void *get_in_addr(struct sockaddr *sa)
     }
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
-// void sendData(char map_id[], char src_vertex_index[], char dest_vertex_index[], char file_size[]){
-// 	printf("Hello %s \n", map_id);
-// 	printf("Hello %s \n", src_vertex_index);
-// 	printf("Hello %s \n", dest_vertex_index);
-// 	//printf("Hello %s \n", file_size);
-// 	int my_sock;
-// 	struct addrinfo hints, *servinfo, *p;
-//     int rv;
-// 	memset(&hints, 0, sizeof hints);
-//     hints.ai_family = AF_UNSPEC; // set to AF_INET to force IPv4
-//     hints.ai_socktype = SOCK_DGRAM;
-// 	//printf("Hello %s \n", file_size);
-// 	if ((rv = getaddrinfo(HOST, UDPPORT, &hints, &servinfo))!= 0) {
-// 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-// 		return;
-// 	}
-// 	//printf("Hellosasas %s \n", file_size);
-// 	for (p = servinfo; p != NULL; p = p->ai_next) {
-// 		if ((my_sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-// 			perror("talker: socket");
-// 			continue;
-// 		}
-// 		break;
-// 	}
-// 	//printf("Hellortrt %s \n", file_size);
-	
-// }
 
 void findVertex(int *vertex, float matrix [MAXROW][3], int len, int src_vertex_index, int dest_vertex_index){
 	int j, k;
 	
 	int srcFound = 0;
 	int destFound = 0;
-	// printf("src_vertex_index:%d", src_vertex_index);
+	printf("len:%d\n", len);
 	// printf("dest_vertex_index:%d", dest_vertex_index);
 	for(j=0 ; j<len;j++){
 		for(k=0;k<2;k++){
-			
+			printf("%f \n", matrix[j][k]);
 			if(src_vertex_index == (int)matrix[j][k] ){
 				srcFound = 1;
 				vertex[0] = 1;
@@ -250,7 +223,7 @@ int main(int argc, char* argv[]){
 		recv(child_fd, src_vertex_index, sizeof src_vertex_index, 0);	
 		recv(child_fd, dest_vertex_index, sizeof dest_vertex_index, 0);	
 		recv(child_fd, file_size, sizeof file_size, 0);	
-		printf("The AWS has received mapID %s , start vertex %s, destination vertex %s and file size %s from the client using TCP over port %d. \n", map_id, src_vertex_index, dest_vertex_index, file_size, client_port);
+		printf("The AWS has received mapID %s , start vertex %s, destination vertex %s and file size %s from the client using TCP over port %s. \n", map_id, src_vertex_index, dest_vertex_index, file_size, TCPPORT);
 		
 		//send map is to server A
 		int numbytes;
@@ -261,7 +234,7 @@ int main(int argc, char* argv[]){
 				perror("talker: sendto");
 				exit(1);
 			}
-		printf("The AWS sent <%s> to Backend-Server A\n", map_id);
+		printf("The AWS has sent map ID to Server A using UDP over port %s\n", UDPPORT);
 
 		float matrix[MAXROW][3];
 		memset(matrix, 0.0, sizeof(matrix));
@@ -308,7 +281,7 @@ int main(int argc, char* argv[]){
 				perror("recvfrom");
 				exit(1);
 		}
-		printf("beforesrc:%d, dest:%d\n",found[0], found[1]);
+		
 		if(val1[0] == '0'){
 			printf("Not found from server A \n");
 			//send to server B
@@ -317,7 +290,7 @@ int main(int argc, char* argv[]){
 				perror("talker: sendto");
 				exit(1);
 			}
-			printf("The AWS sent <%s> to Backend-Server B\n", map_id);
+			printf("The AWS has sent map ID to Server B using UDP over port %s\n", UDPPORT);
 			
 			if ((numbytes = recvfrom(udp_sockfd, &msg, sizeof(val1) , 0,			//wait for the incoming packets
 			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
@@ -359,7 +332,7 @@ int main(int argc, char* argv[]){
 				findVertex(vertex, matrix, lenOfMatrix, atoi(src_vertex_index), atoi(dest_vertex_index));
 			}
 			}else{
-				//printf("340 dest ::%s", dest_vertex_index);
+				//printf("340 len ::%s", dest_vertex_index);
 				printf("AWS has received map information from server A %s \n", val1);
 				findVertex(vertex, matrix, lenOfMatrix,  atoi(src_vertex_index), atoi(dest_vertex_index));
 			}
@@ -368,13 +341,33 @@ int main(int argc, char* argv[]){
 		if(vertex[0] == 1 && vertex[1] == 1){
 			printf("The source and destination vertex are in the graph");
 			//send data to server C
-		// 	if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
-		// 		 udp_C_p->ai_addr, udp_C_p->ai_addrlen)) == -1) {
-		// 		perror("talker: sendto");
-		// 		exit(1);
-		// 	}
-		// printf("The AWS sent <%s> to Backend-Server C\n", map_id);
+			struct Info{
+				char src_index[3];
+				char dest_index[3];
+				char fs[20];
+				int len;
+			}info;
+			strcpy(info.src_index, src_vertex_index);
+			strcpy(info.dest_index, dest_vertex_index);
+			strcpy(info.fs, file_size);
+			info.len = lenOfMatrix;
+
+
+			if ((numbytes = sendto(udp_sockfd, &info, sizeof info, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
+				 udp_C_p->ai_addr, udp_C_p->ai_addrlen)) == -1) {
+				perror("talker: sendto");
+				exit(1);
+			}
+			if ((numbytes = sendto(udp_sockfd, &matrix, sizeof matrix, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
+				 udp_C_p->ai_addr, udp_C_p->ai_addrlen)) == -1) {
+				perror("talker: sendto");
+				exit(1);
+			}
+		printf("The AWS sent map, source ID, destination ID, propagation speed and transmission speed to Server C using UDP over port %s\n", UDPPORT);
+		
+		
 		}else if(vertex[0]==0){
+
 			printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d", src_vertex_index, client_port);
 			if(send(child_fd, src_vertex_index, sizeof(src_vertex_index), 0 )== -1){
 					perror("send:aws");
