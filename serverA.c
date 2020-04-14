@@ -42,12 +42,12 @@ void readValues(FILE *fp){
                 break;
             }
             else {
-                i++;
+                
                 float token_one, token_two, token_three;
                 const char delimiterAgain[2] = " ";
 
                 token_one = atof(strtok(line, delimiterAgain));
-                //printf("%f\t", token_one);
+                printf("%f\tfor i =%d", token_one, i);
 
                 token_two = atof(strtok(NULL, delimiterAgain));
                 //printf("%f\t", token_two);
@@ -57,6 +57,7 @@ void readValues(FILE *fp){
                 matrix[i][0] = token_one;
                 matrix[i][1] = token_two;
                 matrix[i][2] = token_three;
+                i++;
                 len = i;
 
             }

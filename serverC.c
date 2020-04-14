@@ -13,6 +13,9 @@
 #define BACKLOG 10
 #define MAXROW 50
 
+
+float matrix[MAXROW][3];
+
 int main(){
     int socket_fd;
     int numbytes;
@@ -61,18 +64,37 @@ int main(){
 				char dest_index[3];
 				char fs[20];
 				int len;
+                float graph[MAXROW][3];
 			}info;
+
         memset(info.src_index,'0', sizeof(info.src_index));
         memset(info.dest_index,'0', sizeof(info.dest_index));
         memset(info.fs,'0', sizeof(info.fs));
         info.len = 0;
-        //printf("%s",info.src_index);
-        int numbytes = recvfrom(socket_fd, (void*)&info, sizeof info , 0,(struct sockaddr *)&server_addr, &addr_len);
+        memset(info.graph, 0.0, sizeof(info.graph));
+        
+        numbytes = recvfrom(socket_fd, (void*)&info, sizeof info , 0,(struct sockaddr *)&server_addr, &addr_len);
         if(numbytes == -1){
             perror("receive:from");
             exit(1);
         }
-        printf("The Server A has received input for finding graph of map %s . \n", info.src_index);
+
+        // numbytes = recvfrom(socket_fd, &matrix, sizeof matrix , 0,(struct sockaddr *)&server_addr, &addr_len);
+        // if(numbytes == -1){
+        //     perror("receive:from");
+        //     exit(1);
+        // }
+        printf("src_index:%s, dest_index: %s, fs:%s, len: %d", info.src_index, info.dest_index, info.fs, info.len);
+        printf("The Server C has received input for finding graph of map %f. \n", info.graph[0][0]);
+
+        int i, j;
+        //printf("len::%d\n", info.len);
+        for(i = 0; i<info.len; i++){
+            for(j = 0; j<3;j++){
+                printf("%.2f\t", info.graph[i][j]);
+            }
+            printf("\n");
+        }
     }
 
 
