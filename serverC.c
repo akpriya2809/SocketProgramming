@@ -103,7 +103,7 @@ int main(){
             if(i ==0) printf("\n%d\n", info.len);
             for(j = 0; j<2;j++){
                 int num  = (int)info.graph[i][j];
-                printf("%d\t", num);
+                //printf("%d\t", num);
                 if(max< num){
                     max = num;
                 }
@@ -124,16 +124,28 @@ int main(){
             }
             
         }
+        
         int t;
         int count = 1; 
         for(t = 0; t <= max;t++){
             if(temp[t]==1){
                 temp[t]= count++;
             }
-            printf("%d", temp[t]);
         }
-        printf("\n");
+
         int V = count -1;
+        int mapArr [V];
+        memset(mapArr, 0, sizeof(mapArr));
+        int z =0;
+
+        for(t = 0; t <= max;t++){
+            if(temp[t]!=0){
+                printf("t::%d\t z:%d\n",t, z);
+                mapArr[z++]=t;
+            }
+            
+        }
+
         float adjMatrix [V][V];
         memset(adjMatrix, 0.0, sizeof(adjMatrix));
 
@@ -147,16 +159,19 @@ int main(){
     
         }
 
-        for(i= 0; i<V;i++){
-            for(j=0; j<V;j++){
-                printf("%.2f\t", adjMatrix[i][j]);
-            }
-            printf("\n");
-        }
+        // for(i= 0; i<V;i++){
+        //     for(j=0; j<V;j++){
+        //         printf("%.2f\t", adjMatrix[i][j]);
+        //     }
+        //     printf("\n");
+        // }
 
         // find shortest path from adjacency matrix
+       
         float dist[V];
         int sptSet[V];
+        int parent[V];
+        parent[0]=-1;
 
         for (int i = 0; i < V; i++) {
             dist[i] = INT_MAX, sptSet[i] = 0;
@@ -172,13 +187,57 @@ int main(){
                 if (!sptSet[v] && adjMatrix[u][v] && dist[u] != INT_MAX 
                     && dist[u] + adjMatrix[u][v] < dist[v]) {
                     dist[v] = dist[u] + adjMatrix[u][v]; 
+                    parent[v] = u;
                 }
             }
         }
 
         for(i = 0;i<V;i++){
-            printf("%d \t\t %f\t %d\n", i, dist[i], sptSet[i]);
+            printf("%d \t", parent[i]);
         }
+        printf("\n");
+
+        int dest = atoi(info.dest_index);
+        int x = temp[dest]-1;
+        int hops = 0;
+        while(parent[x]!=-1){
+            hops++;
+            x=parent[x];
+
+        }
+        printf("hops::%d\n", hops);
+        int path[hops+1];
+        memset(path, -1, sizeof(path));
+        //path[0] = dest;
+        int p =0;
+        x = temp[dest]-1;
+        while(parent[x]!=-1){
+            path[p++] = mapArr[x];
+            printf("x%d\t", x);
+            x=parent[x];
+
+        }
+        //printf("outside loop x:%d", x);
+        path[p] = mapArr[x];
+        printf("\n");
+        for(i =0; i<hops+1; i++){
+            printf("%d\t", path[i]);
+        }
+        printf("\n");
+        // int k = hops+1;
+        // i = 0;
+        // while(i<k){
+        //     int temp = path[i];
+        //     path[i]= path[k];
+        //     path[k]= temp;
+        //     i++;
+        //     k--;
+        // }
+        // for(i =0; i<hops+1; i++){
+        //     printf("%d\t", path[i]);
+        // }
+        // printf("\n");
+
              
 
         printf("Line 168\n");
