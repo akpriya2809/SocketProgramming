@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include<sys/socket.h>
 #include <netdb.h>
+#include <limits.h>
 
 
 #define SERVERCPORT "32513" 
@@ -15,6 +16,20 @@
 
 
 float matrix[MAXROW][3];
+
+
+int minDistance(float dist[], int sptSet[], int V) 
+{ 
+    // Initialize min value 
+    //printf(" Line 24\n");
+    int min = INT_MAX, min_index; 
+  
+    for (int v = 0; v < V; v++) 
+        if (sptSet[v] == 0 && dist[v] <= min) 
+            min = dist[v], min_index = v; 
+    //printf("min_index:%d\n", min_index);
+    return min_index; 
+} 
 
 int main(){
     int socket_fd;
@@ -78,24 +93,99 @@ int main(){
             perror("receive:from");
             exit(1);
         }
-
-        // numbytes = recvfrom(socket_fd, &matrix, sizeof matrix , 0,(struct sockaddr *)&server_addr, &addr_len);
-        // if(numbytes == -1){
-        //     perror("receive:from");
-        //     exit(1);
-        // }
         printf("src_index:%s, dest_index: %s, fs:%s, len: %d", info.src_index, info.dest_index, info.fs, info.len);
         printf("The Server C has received input for finding graph of map %f. \n", info.graph[0][0]);
 
-        int i, j;
-        //printf("len::%d\n", info.len);
+        int i = 0, j=0;
+
+        int max = 0;
         for(i = 0; i<info.len; i++){
-            for(j = 0; j<3;j++){
-                printf("%.2f\t", info.graph[i][j]);
+            if(i ==0) printf("\n%d\n", info.len);
+            for(j = 0; j<2;j++){
+                int num  = (int)info.graph[i][j];
+                printf("%d\t", num);
+                if(max< num){
+                    max = num;
+                }
+                
+            }
+    
+        }
+        
+        
+        int temp[max + 1];
+        memset(temp, 0, sizeof(temp));
+        for(i = 0; i<info.len; i++){
+            for(j = 0; j<2;j++){
+                if(temp[(int)info.graph[i][j]] != 1){
+                    temp[(int)info.graph[i][j]] = 1; 
+                }
+                
+            }
+            
+        }
+        int t;
+        int count = 1; 
+        for(t = 0; t <= max;t++){
+            if(temp[t]==1){
+                temp[t]= count++;
+            }
+            printf("%d", temp[t]);
+        }
+        printf("\n");
+        int V = count -1;
+        float adjMatrix [V][V];
+        memset(adjMatrix, 0.0, sizeof(adjMatrix));
+
+        for(i = 0; i<info.len; i++){
+                int num1  = (int)info.graph[i][0];
+                int num2 = (int) info.graph[i][1];
+                if(temp[num1]!=0 && temp[num1]!=0){
+                    adjMatrix[temp[num1]-1][temp[num2]-1] = info.graph[i][2];
+                    adjMatrix[temp[num2]-1][temp[num1]-1] = info.graph[i][2];
+                }
+    
+        }
+
+        for(i= 0; i<V;i++){
+            for(j=0; j<V;j++){
+                printf("%.2f\t", adjMatrix[i][j]);
             }
             printf("\n");
         }
+
+        // find shortest path from adjacency matrix
+        float dist[V];
+        int sptSet[V];
+
+        for (int i = 0; i < V; i++) {
+            dist[i] = INT_MAX, sptSet[i] = 0;
+        }
+        int src = atoi(info.src_index);
+        dist[temp[src]-1] = 0.0;
+
+        for(i = 0; i < V-1; i++){
+            int u = minDistance(dist, sptSet, V); 
+            sptSet[u]=1;
+            for (int v = 0; v < V; v++) {
+
+                if (!sptSet[v] && adjMatrix[u][v] && dist[u] != INT_MAX 
+                    && dist[u] + adjMatrix[u][v] < dist[v]) {
+                    dist[v] = dist[u] + adjMatrix[u][v]; 
+                }
+            }
+        }
+
+        for(i = 0;i<V;i++){
+            printf("%d \t\t %f\t %d\n", i, dist[i], sptSet[i]);
+        }
+             
+
+        printf("Line 168\n");
+
+
     }
+    
 
 
 
