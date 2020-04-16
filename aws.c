@@ -324,9 +324,9 @@ int main(int argc, char* argv[]){
 				//printf("340 len ::%s", dest_vertex_index);
 				printf("AWS has received map information from server A %s \n", val1);
 				findVertex(vertex, matrix, lenOfMatrix,  atoi(src_vertex_index), atoi(dest_vertex_index));
-				printf("matrix first ele line 323:%f\n", matrix[0][0]);
+				//printf("matrix first ele line 323:%f\n", matrix[0][0]);
 			}
-		printf("src:%d, dest:%d\n",vertex[0], vertex[1]);
+		//printf("src:%d, dest:%d\n",vertex[0], vertex[1]);
 		
 		if(vertex[0] == 1 && vertex[1] == 1){
 			printf("The source and destination vertex are in the graph\n");
@@ -334,12 +334,28 @@ int main(int argc, char* argv[]){
 			struct Info{
 				char src_index[3];
 				char dest_index[3];
+				char prop_speed[150];
+				char trans_speed[150];
+				char map_id[2];
 				char fs[20];
 				int len;
 				float graph[MAXROW][3];
 			}info;
+			//remove trailing newline character from prop speed and trasn speed
+			size_t ln1 = strlen(val1) - 1;
+        	if (*val1 && val1[ln1] == '\n') 
+            val1[ln1] = '\0';
+
+			size_t ln2 = strlen(val2) - 1;
+        	if (*val2 && val2[ln2] == '\n') 
+            val2[ln2] = '\0';
+
+			printf("Line 353 map_id:%s\n", map_id);
 			strcpy(info.src_index, src_vertex_index);
 			strcpy(info.dest_index, dest_vertex_index);
+			strcpy(info.prop_speed, val1);
+			strcpy(info.trans_speed, val2);
+			strcpy(info.map_id, map_id);
 			strcpy(info.fs, file_size);
 			info.len = lenOfMatrix;
 			int j,k;
@@ -348,8 +364,20 @@ int main(int argc, char* argv[]){
 					info.graph[j][k] = matrix[j][k];
 				}
 			}
-			printf("matrix first ele:%f", matrix[0][0]);
-			printf("graph first ele:%f", info.graph[0][0]);
+			//printf("matrix first ele:%f", matrix[0][0]);
+			// printf("\niprop_speed:%s\n", info.prop_speed);
+			// printf("itrans_speed:%s\n", info.trans_speed);
+			// printf("isource:%s\n", info.src_index);
+			// printf("idest:%s\n", info.dest_index);
+			// printf("imap_id:%s\n", info.map_id);
+			// printf("ifs:%s\n", info.fs);
+
+			// printf("\nprop_speed:%s\n", val1);
+			// printf("trans_speed:%s\n", val2);
+			// printf("source:%s\n", src_vertex_index);
+			// printf("dest:%s\n", dest_vertex_index);
+			// printf("map_id:%s\n", map_id);
+			// printf("fs:%s\n", file_size);
 
 			if ((numbytes = sendto(udp_sockfd, &info, sizeof info, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
 				 udp_C_p->ai_addr, udp_C_p->ai_addrlen)) == -1) {
@@ -363,6 +391,32 @@ int main(int argc, char* argv[]){
 			// 	exit(1);
 			// }
 		printf("The AWS sent map, source ID, destination ID, propagation speed and transmission speed to Server C using UDP over port %s\n", UDPPORT);
+
+		struct Result{
+				int shortest_path[3];
+                char prop_speed[150];
+                char trans_speed[150];
+			}result;
+        memset(result.shortest_path, 0 , sizeof(result.shortest_path));
+        memset(result.prop_speed, '0', sizeof(result.prop_speed));
+        memset(result.trans_speed,'0', sizeof(result.trans_speed));
+
+		
+
+		if ((numbytes = recvfrom(udp_sockfd, &result, sizeof(result) , 0,			//wait for the incoming packets
+				(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+					perror("recvfrom");
+					exit(1);
+		}
+		//send result to client
+		
+		if(send(child_fd, &result, sizeof(result), 0 )== -1){
+			perror("send:aws");
+		}else{
+			close(child_fd);
+			exit(0);
+					
+		}
 		
 		
 		}else if(vertex[0]==0){

@@ -56,7 +56,7 @@ int main(int argc, char* argv[]){
 		}
 		break;
 	}
-    printf("after for in client. \n");
+    
 if (p == NULL) {
 		fprintf(stderr, "client: failed to connect. \n");
 		exit(0);
