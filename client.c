@@ -73,14 +73,46 @@ if (p == NULL) {
     
 	printf("The client has sent query to AWS using TCP: start vertex %s; destination vertex %s;map %s;file size %s.\n",src_vertex_index,
 	 	dest_vertex_index, map_id, file_size);
-	printf("before:::%s", receiveMsg);
-	int numbytes = recv(socket_fd, &receiveMsg,sizeof(receiveMsg), 0);
+	//printf("before:::%s", receiveMsg);
+	struct Result{
+				int shortest_path[3];
+				int pathlen;
+				float shortest_dist;
+                char prop_speed[150];
+                char trans_speed[150];
+			}result;
+	memset(result.shortest_path, 0 , sizeof(result.shortest_path));
+	memset(result.prop_speed, '0', sizeof(result.prop_speed));
+	memset(result.trans_speed,'0', sizeof(result.trans_speed));
+	result.pathlen = 0;
+	result.shortest_dist = 0.0;
+	
+	printf("line 90: before %d", result.shortest_path[0]);
+
+	int numbytes = recv(socket_fd, &result, sizeof(result), 0);
 	if(numbytes == -1){
 		perror("recv:client");
 		exit(1);
 	}
 
-	printf("Message received from AWS.%s \n", receiveMsg);
+	float delay = atof(result.trans_speed)+atof(result.prop_speed);
+	printf("The client has received results from AWS:\n");
+	printf("------------------------------------------------------\n");
+	printf("Source\tDestination\tMin Length\t\t Tt \t\t Tp \t\t Delay \n");
+	printf("------------------------------------------------------\n");
+	printf("%s \t %s \t\t\t %.2f \t %s \t %s \t %.2f\n", src_vertex_index, dest_vertex_index, result.shortest_dist,result.trans_speed, result.prop_speed, delay);
+
+	printf("Shortest Path:");
+        int i;
+        for(i = 0; i<result.pathlen; i++){
+            if(i== result.pathlen-1){
+                printf("%d", result.shortest_path[i]);
+            }else{
+                printf("%d -- ", result.shortest_path[i]);
+            }
+        }
+
+	printf("\nMessage received from AWS.%d \n", result.shortest_path[0]);
 	close(socket_fd);
 
      

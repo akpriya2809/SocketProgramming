@@ -279,18 +279,22 @@ int main(){
 
         struct Result{
 				int shortest_path[3];
+                int pathlen;
+                float shortest_dist;
                 char prop_speed[150];
                 char trans_speed[150];
 			}result;
         memset(result.shortest_path, '0', sizeof(result.shortest_path));
         memset(result.prop_speed, '0', sizeof(result.prop_speed));
         memset(result.trans_speed,'0', sizeof(result.trans_speed));
+        
+        result.pathlen = total;
+        result.shortest_dist = dist[temp[dest]-1];
 
         memcpy(result.shortest_path, path, sizeof(path));
         strcpy(result.prop_speed, info.prop_speed);
         strcpy(result.trans_speed, info.trans_speed);
-        printf("path[0]:%d\n",path[0]);
-        printf("shortest_path[0]:%d\n",result.shortest_path[0]);
+        
 
         if ((numbytes = sendto(socket_fd, &result, sizeof(result), 0,	// send to UDP server, the address is assigned in getaddrinfo function above
 				 (struct sockaddr *)&server_addr, addr_len)) == -1) {

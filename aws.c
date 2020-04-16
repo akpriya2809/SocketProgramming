@@ -394,12 +394,16 @@ int main(int argc, char* argv[]){
 
 		struct Result{
 				int shortest_path[3];
+				int pathlen;
+				float shortest_dist;
                 char prop_speed[150];
                 char trans_speed[150];
 			}result;
         memset(result.shortest_path, 0 , sizeof(result.shortest_path));
         memset(result.prop_speed, '0', sizeof(result.prop_speed));
         memset(result.trans_speed,'0', sizeof(result.trans_speed));
+		result.pathlen = 0;
+		result.shortest_dist = 0.0;
 
 		
 
@@ -409,16 +413,34 @@ int main(int argc, char* argv[]){
 					exit(1);
 		}
 		//send result to client
+		printf("The AWS has received results from server C:\n");
+		printf("Shortest Path:");
+        int i;
+        for(i = 0; i<result.pathlen; i++){
+            if(i== result.pathlen-1){
+                printf("%d", result.shortest_path[i]);
+            }else{
+                printf("%d -- ", result.shortest_path[i]);
+            }
+            
+            if(i == result.pathlen -2){
+                printf("\n");
+            }
+        }
+		printf("\n\tShortest distance:%.2f km\n", result.shortest_dist);
+		printf("\tTransmission Delay: %s s\n", result.trans_speed);
+		printf("\tPropagation Delay: %s s\n", result.prop_speed);
+
+		//send result to client
 		
 		if(send(child_fd, &result, sizeof(result), 0 )== -1){
 			perror("send:aws");
 		}else{
+			printf("The AWS has sent calculated results to client using TCP over port %s", TCPPORT);
 			close(child_fd);
 			exit(0);
 					
 		}
-		
-		
 		}else if(vertex[0]==0){
 
 			printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d", src_vertex_index, client_port);
