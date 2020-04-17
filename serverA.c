@@ -47,7 +47,7 @@ void readValues(FILE *fp){
                 const char delimiterAgain[2] = " ";
 
                 token_one = atof(strtok(line, delimiterAgain));
-                printf("%f\tfor i =%d", token_one, i);
+                //printf("%f\tfor i =%d", token_one, i);
 
                 token_two = atof(strtok(NULL, delimiterAgain));
                 //printf("%f\t", token_two);
@@ -109,7 +109,6 @@ int main(){
     freeaddrinfo(servinfo);
     
 	printf( "The Server A is up and running using UDP on port %s.\n", SERVERAPORT);
-    
 
     while(1){
         addr_len = sizeof server_addr;
@@ -121,6 +120,8 @@ int main(){
         memset(msg, 'N', strlen(msg));
         char map_id[2];
         memset(map_id, '0', strlen(map_id));
+
+        //printf("Line 132:::val1:%s val2:%s, msg :%s\n", val1, val2, msg);
 
         int numbytes = recvfrom(socket_fd, map_id, sizeof map_id , 0,(struct sockaddr *)&server_addr, &addr_len);
         if(numbytes == -1){
@@ -157,15 +158,7 @@ int main(){
         
         fclose(fp);
 
-        // int j, k;
-        // int l = sizeof(matrix);
-        printf("len::::%d\n", len);
-        // for(j=0 ; j<len;j++){
-        //     for(k=0;k<3;k++){
-        //         printf("%f\t", matrix[j][k]);
-        //     }
-        // printf("\n");
-        // }
+        printf("Line 169:::val1:%s val2:%s, msg :%s\n", val1, val2, msg);
         if ((numbytes = sendto(socket_fd, &msg, sizeof(val1), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");

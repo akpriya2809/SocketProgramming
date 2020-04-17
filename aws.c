@@ -29,7 +29,7 @@ void findVertex(int *vertex, float matrix [MAXROW][3], int len, int src_vertex_i
 	int j, k;
 	for(j=0 ; j<len;j++){
 		for(k=0;k<2;k++){
-			printf("%f\t", matrix[j][k]);
+			//printf("%f\t", matrix[j][k]);
 			if(src_vertex_index == (int)matrix[j][k] ){
 				vertex[0] = 1;
 			}
@@ -57,6 +57,7 @@ int main(int argc, char* argv[]){
     hints.ai_flags = AI_PASSIVE;
 
     int rv;
+	int yes = 1;
     if ((rv = getaddrinfo(HOST, TCPPORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
@@ -67,6 +68,12 @@ int main(int argc, char* argv[]){
 			perror("server: socket");
 			continue;
 		}
+		if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes,
+				sizeof(int)) == -1) {
+			perror("setsockopt");
+			exit(1);
+		}
+
 		if (bind(socket_fd, p->ai_addr, p->ai_addrlen) == -1) {
 			close(socket_fd);
 			perror("aws server: bind");
@@ -268,58 +275,64 @@ int main(int argc, char* argv[]){
 				perror("recvfrom");
 				exit(1);
 		}
-		printf("matrix 270:%f\n", matrix[0][0]);
+		printf("matrix 270val1:%s msg :%s\n",val1, msg);
 		
 		if(val1[0] == '0'){
-			printf("Not found from server A \n");
-			//send to server B
-			if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
-				 udp_B_p->ai_addr, udp_B_p->ai_addrlen)) == -1) {
-				perror("talker: sendto");
-				exit(1);
-			}
-			printf("The AWS has sent map ID to Server B using UDP over port %s\n", UDPPORT);
-			
-			if ((numbytes = recvfrom(udp_sockfd, &msg, sizeof(val1) , 0,			//wait for the incoming packets
-			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
-				perror("recvfrom");
-				exit(1);
-			}
+						printf("Not found from server A \n");
+						//send to server B
+						if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
+							udp_B_p->ai_addr, udp_B_p->ai_addrlen)) == -1) {
+							perror("talker: sendto");
+							exit(1);
+						}
+						printf("The AWS has sent map ID to Server B using UDP over port %s\n", UDPPORT);
+						
+						if ((numbytes = recvfrom(udp_sockfd, &msg, sizeof(val1) , 0,			//wait for the incoming packets
+						(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+							perror("recvfrom");
+							exit(1);
+						}
 
-			if ((numbytes = recvfrom(udp_sockfd, &val1, sizeof(val1) , 0,			//wait for the incoming packets
-			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
-				perror("recvfrom");
-				exit(1);
-			}
-			if ((numbytes = recvfrom(udp_sockfd, &val2, sizeof(val2) , 0,			//wait for the incoming packets
-				(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
-					perror("recvfrom");
-					exit(1);
-			}
-			if ((numbytes = recvfrom(udp_sockfd, &matrix, sizeof(matrix) , 0,			//wait for the incoming packets
-				(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
-					perror("recvfrom");
-					exit(1);
-			}
-			printf("matrix 301:%f\n", matrix[0][0]);
+						if ((numbytes = recvfrom(udp_sockfd, &lenOfMatrix, sizeof(lenOfMatrix) , 0,			//wait for the incoming packets
+							(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+								perror("recvfrom");
+								exit(1);
+						}
 
-			
-			if(val1[0] == '0'){
-				//return the message back to client
-				printf("Not found from server B As well \n");
-				if(send(child_fd, map_id, sizeof(src_vertex_index), 0 )== -1){
-					perror("send:aws");
-				}else{
-					close(child_fd);
-					exit(0);
-					
-				}
-				
-			}else{
-				printf("AWS has received map information from server B %s \n", val1);
-				
-				findVertex(vertex, matrix, lenOfMatrix, atoi(src_vertex_index), atoi(dest_vertex_index));
-			}
+						if ((numbytes = recvfrom(udp_sockfd, &val1, sizeof(val1) , 0,			//wait for the incoming packets
+						(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+							perror("recvfrom");
+							exit(1);
+						}
+						if ((numbytes = recvfrom(udp_sockfd, &val2, sizeof(val2) , 0,			//wait for the incoming packets
+							(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+								perror("recvfrom");
+								exit(1);
+						}
+						if ((numbytes = recvfrom(udp_sockfd, &matrix, sizeof(matrix) , 0,			//wait for the incoming packets
+							(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+								perror("recvfrom");
+								exit(1);
+						}
+						printf("matrix 301:matrix[0][0]:%f, val2: %s\n", matrix[0][0], val2);
+
+						
+						if(val1[0] == '0'){
+							//return the message back to client
+							printf("Not found from server B As well \n");
+							if(send(child_fd, map_id, sizeof(src_vertex_index), 0 )== -1){
+								perror("send:aws");
+							}else{
+								close(child_fd);
+								exit(0);
+								
+							}
+							
+						}else{
+							printf("AWS has received map information from server B %s \n", val1);
+							printf("matrix first ele line 320:%f\n", matrix[0][0]);
+							findVertex(vertex, matrix, lenOfMatrix, atoi(src_vertex_index), atoi(dest_vertex_index));
+						}
 			}else{
 				//printf("340 len ::%s", dest_vertex_index);
 				printf("AWS has received map information from server A %s \n", val1);
@@ -384,12 +397,6 @@ int main(int argc, char* argv[]){
 				perror("talker: sendto");
 				exit(1);
 			}
-			// printf("matrix val: %f", matrix[0][0]);
-			// if ((numbytes = sendto(udp_sockfd, &matrix, sizeof matrix, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
-			// 	 udp_C_p->ai_addr, udp_C_p->ai_addrlen)) == -1) {
-			// 	perror("talker: sendto");
-			// 	exit(1);
-			// }
 		printf("The AWS sent map, source ID, destination ID, propagation speed and transmission speed to Server C using UDP over port %s\n", UDPPORT);
 
 		struct Result{
@@ -436,8 +443,8 @@ int main(int argc, char* argv[]){
 		if(send(child_fd, &result, sizeof(result), 0 )== -1){
 			perror("send:aws");
 		}else{
-			printf("The AWS has sent calculated results to client using TCP over port %s", TCPPORT);
-			close(child_fd);
+			printf("The AWS has sent calculated results to client using TCP over port %s\n", TCPPORT);
+			//close(child_fd);
 			exit(0);
 					
 		}
@@ -447,7 +454,7 @@ int main(int argc, char* argv[]){
 			if(send(child_fd, src_vertex_index, sizeof(src_vertex_index), 0 )== -1){
 					perror("send:aws");
 				}else{
-					close(child_fd);
+					//close(child_fd);
 					exit(0);
 					
 				}
@@ -456,7 +463,7 @@ int main(int argc, char* argv[]){
 			if(send(child_fd, dest_vertex_index, sizeof(dest_vertex_index), 0 )== -1){
 					perror("send:aws");
 				}else{
-					close(child_fd);
+					//close(child_fd);
 					exit(0);
 					
 				}

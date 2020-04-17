@@ -12,7 +12,7 @@
 #define BACKLOG 10
 #define MAXROW 50
 
-char matrix[MAXROW][3][150];
+float matrix[MAXROW][3];
 int len = 0;
 
 
@@ -42,21 +42,21 @@ void readValues(FILE *fp){
                 break;
             }
             else {
-                i++;
-                char *token_one, *token_two, *token_three;
+                float token_one, token_two, token_three;
                 const char delimiterAgain[2] = " ";
 
-                token_one = strtok(line, delimiterAgain);
+                token_one = atof(strtok(line, delimiterAgain));
                 //printf("%s\t", token_one);
 
-                token_two = strtok(NULL, delimiterAgain);
+                token_two = atof(strtok(NULL, delimiterAgain));
                 //printf("%s\t", token_two);
 
-                token_three = strtok(NULL, delimiterAgain);
+                token_three = atof(strtok(NULL, delimiterAgain));
                 //printf("%s\n", token_three);
-                strcpy(matrix[i][0], token_one);
-                strcpy(matrix[i][1], token_two);
-                strcpy(matrix[i][2], token_three);
+                matrix[i][0] = token_one;
+                matrix[i][1] = token_two;
+                matrix[i][2] = token_three;
+                i++;
                 len = i;
 
             }
@@ -155,16 +155,21 @@ int main(){
         
         fclose(fp);
 
-        int j, k;
-        int l = sizeof(matrix);
+        // int j, k;
+        // // int l = sizeof(matrix);
         // printf("%d\n", len);
         // for(j=0 ; j<len;j++){
         //     for(k=0;k<3;k++){
-        //         printf("%s\t", matrix[j][k]);
+        //         printf("%.2f\t", matrix[j][k]);
         //     }
         // printf("\n");
-        //}
+        }
         if ((numbytes = sendto(socket_fd, &msg, sizeof(val1), 0,	
+            (struct sockaddr *)&server_addr, addr_len)) == -1) {
+			perror("senderr: sendto");
+			exit(1);
+		}
+        if ((numbytes = sendto(socket_fd, &len, sizeof(len), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");
 			exit(1);
