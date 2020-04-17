@@ -163,8 +163,8 @@ int main(){
         //         printf("%.2f\t", matrix[j][k]);
         //     }
         // printf("\n");
-        }
-        if ((numbytes = sendto(socket_fd, &msg, sizeof(val1), 0,	
+        //}
+        if ((numbytes = sendto(socket_fd, &msg, sizeof(msg), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");
 			exit(1);
