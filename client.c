@@ -74,45 +74,66 @@ if (p == NULL) {
 	printf("The client has sent query to AWS using TCP: start vertex %s; destination vertex %s;map %s;file size %s.\n",src_vertex_index,
 	 	dest_vertex_index, map_id, file_size);
 	//printf("before:::%s", receiveMsg);
-	struct Result{
+	// struct ClientResult{
+		// 		int shortest_path[3];
+		// 		int pathlen;
+		// 		float shortest_dist;
+        //         char prop_speed[150];
+        //         char trans_speed[150];
+		// 		char mapIdErr[2];
+		// 		char vertexIdErr[3];
+		// 	}clientresult;
+	struct ClientResult{
 				int shortest_path[3];
 				int pathlen;
 				float shortest_dist;
                 char prop_speed[150];
                 char trans_speed[150];
-			}result;
-	memset(result.shortest_path, 0 , sizeof(result.shortest_path));
-	memset(result.prop_speed, '0', sizeof(result.prop_speed));
-	memset(result.trans_speed,'0', sizeof(result.trans_speed));
-	result.pathlen = 0;
-	result.shortest_dist = 0.0;
+				char mapIdErr[2];
+				char vertexIdErr[3];
+			}clientresult;
+	memset(clientresult.shortest_path, 0 , sizeof(clientresult.shortest_path));
+	memset(clientresult.prop_speed, '0', sizeof(clientresult.prop_speed));
+	memset(clientresult.trans_speed,'0', sizeof(clientresult.trans_speed));
+	memset(clientresult.mapIdErr,'$', sizeof(clientresult.mapIdErr));
+	memset(clientresult.vertexIdErr, '$', sizeof(clientresult.vertexIdErr));
+	clientresult.pathlen = 0;
+	clientresult.shortest_dist = 0.0;
 	
-	printf("line 90: before %d", result.shortest_path[0]);
+	//printf("line 90: before %d", clientresult.shortest_path[0]);
 
-	int numbytes = recv(socket_fd, &result, sizeof(result), 0);
+	int numbytes = recv(socket_fd, &clientresult, sizeof(clientresult), 0);
 	if(numbytes == -1){
 		perror("recv:client");
 		exit(1);
 	}
 
-	float delay = atof(result.trans_speed)+atof(result.prop_speed);
-	printf("The client has received results from AWS:\n");
-	printf("------------------------------------------------------\n");
-	printf("Source\tDestination\tMin Length\t\t Tt \t\t Tp \t\t Delay \n");
-	printf("------------------------------------------------------\n");
-	printf("%s \t %s \t\t\t %.2f \t %s \t %s \t %.2f\n", src_vertex_index, dest_vertex_index, result.shortest_dist,result.trans_speed, result.prop_speed, delay);
+	//check for receives message if error / data
+	if(clientresult.mapIdErr[0] =='$' && clientresult.vertexIdErr[0] == '$'){
+		float delay = atof(clientresult.trans_speed)+atof(clientresult.prop_speed);
+		printf("The client has received results from AWS:\n");
+		printf("------------------------------------------------------\n");
+		printf("Source\tDestination\tMin Length\t\t Tt \t\t Tp \t\t Delay \n");
+		printf("------------------------------------------------------\n");
+		printf("%s \t %s \t\t\t %.2f \t %s \t %s \t %.2f\n", src_vertex_index, dest_vertex_index, clientresult.shortest_dist,clientresult.trans_speed, clientresult.prop_speed, delay);
 
-	printf("Shortest Path:");
-        int i;
-        for(i = 0; i<result.pathlen; i++){
-            if(i== result.pathlen-1){
-                printf("%d", result.shortest_path[i]);
-            }else{
-                printf("%d -- ", result.shortest_path[i]);
-            }
-        }
+		printf("Shortest Path:");
+			int i;
+			for(i = 0; i<clientresult.pathlen; i++){
+				if(i== clientresult.pathlen-1){
+					printf("%d", clientresult.shortest_path[i]);
+				}else{
+					printf("%d -- ", clientresult.shortest_path[i]);
+				}
+			}
+	}else if(clientresult.mapIdErr[0] != '$'){
+		printf("No map id %s was found\n", clientresult.mapIdErr);
+	}else {
+		printf("No vertex id %s was found\n", clientresult.vertexIdErr);
+	}
 
-	printf("\nMessage received from AWS.%d \n", result.shortest_path[0]);
+	
+	printf("\nMessage received from AWS \n");
 	close(socket_fd);
 
      

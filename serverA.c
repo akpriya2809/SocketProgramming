@@ -47,13 +47,10 @@ void readValues(FILE *fp){
                 const char delimiterAgain[2] = " ";
 
                 token_one = atof(strtok(line, delimiterAgain));
-                //printf("%f\tfor i =%d", token_one, i);
 
                 token_two = atof(strtok(NULL, delimiterAgain));
-                //printf("%f\t", token_two);
 
-                token_three = atof(strtok(NULL, delimiterAgain));
-                //printf("%f\n", token_three);
+                token_three = atof(strtok(NULL, delimiterAgain));\
                 matrix[i][0] = token_one;
                 matrix[i][1] = token_two;
                 matrix[i][2] = token_three;
@@ -113,22 +110,20 @@ int main(){
     while(1){
         addr_len = sizeof server_addr;
         char val1[15];
-        memset(val1, '0', strlen(val1));
+        memset(val1, '0', sizeof(val1));
         char val2[15];
-        memset(val2, '0', strlen(val2));
+        memset(val2, '0', sizeof(val2));
         char msg[2];
-        memset(msg, 'N', strlen(msg));
+        memset(msg, 'N', sizeof(msg));
         char map_id[2];
-        memset(map_id, '0', strlen(map_id));
-
-        //printf("Line 132:::val1:%s val2:%s, msg :%s\n", val1, val2, msg);
+        memset(map_id, '0', sizeof(map_id));
 
         int numbytes = recvfrom(socket_fd, map_id, sizeof map_id , 0,(struct sockaddr *)&server_addr, &addr_len);
         if(numbytes == -1){
             perror("receive:from");
             exit(1);
         }
-        printf("The Server A has received input for finding graph of map %s . \n", map_id);
+        printf("The Server A has received input for finding graph of map %s \n", map_id);
         //search map id from Map1.txt
         char buf[255];
         memset(buf, '0', strlen(buf));
@@ -143,13 +138,10 @@ int main(){
 
             if(compareLine(buf, map_id)) {
                 msg[0] = 'A';
-                printf("%s\n", buf);
                
                 fgets(val1, 15, fp);
-                printf("Value1: %s\n", val1);
 
                 fgets(val2, 150, fp);
-                printf("Value2: %s\n", val2);
                 
                 readValues(fp);
                 break;
@@ -158,7 +150,7 @@ int main(){
         
         fclose(fp);
 
-        printf("Line 169:::val1:%s val2:%s, msg :%s\n", val1, val2, msg);
+        
         if ((numbytes = sendto(socket_fd, &msg, sizeof(val1), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");
@@ -186,7 +178,7 @@ int main(){
 			exit(1);
 		}
         if(msg[0] == 'N'){
-            printf("The Server A does not have required graph id.\n");
+            printf("The Server A does not have required graph id %s\n", map_id);
             printf("The Server A has sent \"Graph not found\" to AWS.\n");
         }else{
             printf("The Server A sent Graph to AWS.\n");

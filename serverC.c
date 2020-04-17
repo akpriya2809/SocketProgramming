@@ -20,14 +20,12 @@ float matrix[MAXROW][3];
 
 int minDistance(float dist[], int sptSet[], int V) 
 { 
-    // Initialize min value 
-    //printf(" Line 24\n");
+    
     int min = INT_MAX, min_index; 
   
     for (int v = 0; v < V; v++) 
         if (sptSet[v] == 0 && dist[v] <= min) 
             min = dist[v], min_index = v; 
-    //printf("min_index:%d\n", min_index);
     return min_index; 
 } 
 
@@ -100,28 +98,17 @@ int main(){
         
         
         printf("The Server C has received data for calculation:\n");
-        printf("\t*Propagation Speed:%s km/s\n", info.prop_speed);
-        printf("\t*Transmission Speed:%s km/s\n", info.trans_speed);
-        printf("\t*map ID:%s\n", info.map_id);
-        printf("\t*Source ID:%s \t Destination ID:%s\n", info.src_index, info.dest_index);
-
-
-        // printf("prop_speed:%s\n", info.prop_speed);
-        // printf("trans_speed:%s\n", info.trans_speed);
-        // printf("source:%s\n", info.src_index);
-        // printf("dest:%s\n", info.dest_index);
-        // printf("map_id:%s\n", info.map_id);
-        // printf("fs:%s\n", info.fs);
-        // printf("len:%d\n",info.len);
+        printf("\t*Propagation Speed: %s km/s\n", info.prop_speed);
+        printf("\t*Transmission Speed %s km/s\n", info.trans_speed);
+        printf("\t\t*map ID:%s\n", info.map_id);
+        printf("\t*Source ID: %s \t Destination ID: %s\n", info.src_index, info.dest_index);
 
         int i = 0, j=0;
 
         int max = 0;
         for(i = 0; i<info.len; i++){
-            //if(i ==0) printf("\n%d\n", info.len);
             for(j = 0; j<2;j++){
                 int num  = (int)info.graph[i][j];
-                // printf("%d\t", num);
                 if(max< num){
                     max = num;
                 }
@@ -129,10 +116,6 @@ int main(){
             }
     
         }
-
-        printf("\n");
-        
-        
         int temp[max + 1];
         memset(temp, 0, sizeof(temp));
         for(i = 0; i<info.len; i++){
@@ -160,7 +143,6 @@ int main(){
 
         for(t = 0; t <= max;t++){
             if(temp[t]!=0){
-                //printf("t::%d\t z:%d\n",t, z);
                 mapArr[z++]=t;
             }
             
@@ -179,15 +161,6 @@ int main(){
     
         }
 
-        // for(i= 0; i<V;i++){
-        //     for(j=0; j<V;j++){
-        //         printf("%.2f\t", adjMatrix[i][j]);
-        //     }
-        //     printf("\n");
-        // }
-
-        // find shortest path from adjacency matrix
-       
         float dist[V];
         int sptSet[V];
         int parent[V];
@@ -211,11 +184,7 @@ int main(){
                 }
             }
         }
-
-        // for(i = 0;i<V;i++){
-        //     printf("dist arr%f \t", dist[i]);
-        // }
-        printf("\n");
+        
 
         int dest = atoi(info.dest_index);
         int x = temp[dest]-1;
@@ -225,25 +194,20 @@ int main(){
             x=parent[x];
 
         }
-        //printf("hops::%d\n", hops);
+        
         int path[hops+1];
         memset(path, -1, sizeof(path));
-        //path[0] = dest;
+        
         int p =0;
         x = temp[dest]-1;
-        //float pathDist = 0.0;
+       
         while(parent[x]!=-1){
             path[p++] = mapArr[x];
             x=parent[x];
 
         }
-        //printf("outside loop apthdist:%f", pathDist);
+        
         path[p] = mapArr[x];
-        //printf("\n");
-        for(i =0; i<hops+1; i++){
-           // printf("%d\t", path[i]);
-        }
-        //printf("\n");
         int k = hops;
         i = 0;
         while(i<k){
@@ -253,9 +217,6 @@ int main(){
             i++;
             k--;
         }
-        // for(i =0; i<hops+1; i++){
-        //     printf("%d\t", path[i]);
-        // }
         
         printf("The Server C has finished  the calculation:\n");
         printf("Shortest Path:");
@@ -302,7 +263,7 @@ int main(){
 			exit(1);
 		}
 
-		printf("The Server A finished sending the output to AWS\n");
+		printf("The Server C has finished sending the output to AWS\n");
 
 
     }
