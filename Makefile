@@ -1,4 +1,4 @@
-socketProg: serverA.c serverB.c serverC.c aws.c client.c
+all: serverA.c serverB.c serverC.c aws.c client.c
 			gcc -o serverA serverA.c
 			gcc -o serverB serverB.c
 			gcc -o serverC serverC.c
