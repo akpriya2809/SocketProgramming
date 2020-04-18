@@ -138,6 +138,7 @@ int main(){
 
             if(compareLine(buf, map_id)) {
                 msg[0] = 'A';
+                printf("Line 141:");
                
                 fgets(val1, 15, fp);
 

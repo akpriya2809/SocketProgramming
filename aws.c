@@ -355,6 +355,8 @@ int main(int argc, char* argv[]){
 				findVertex(vertex, matrix, lenOfMatrix,  atoi(src_vertex_index), atoi(dest_vertex_index));
 				
 			}
+
+			printf("vertex::%d",vertex[0]);
 		
 		if(vertex[0] == 1 && vertex[1] == 1){
 							printf("The source and destination vertex are in the graph\n");
@@ -450,7 +452,7 @@ int main(int argc, char* argv[]){
 						memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
 						memset(clientresult.vertexIdErr ,'$', sizeof(clientresult.vertexIdErr));
 
-						// send teh calculated results to client
+						// send the calculated results to client
 						if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
 							perror("send:aws");
 						}else{
@@ -462,6 +464,7 @@ int main(int argc, char* argv[]){
 
 			printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d", src_vertex_index, client_port);
 			strcpy(clientresult.vertexIdErr ,src_vertex_index);
+			memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
 			if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
 					perror("send:aws");
 				}else{
@@ -469,8 +472,9 @@ int main(int argc, char* argv[]){
 					//exit(0);
 					
 				}
-		}else if (vertex[1]==0){
+		}else {
 			strcpy(clientresult.vertexIdErr,dest_vertex_index);
+			memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
 			printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d", dest_vertex_index, client_port);
 			if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
 					perror("send:aws");
@@ -479,11 +483,12 @@ int main(int argc, char* argv[]){
 					//exit(0);
 					
 				}
-		}else{
-			printf("The source and destination vertex are not found in the graph, sending error to client using TCP over PORT %d", client_port);
-			//send message to client
-			
 		}
+		// else{
+		// 	printf("The source and destination vertex are not found in the graph, sending error to client using TCP over PORT %d", client_port);
+		// 	//send message to client
+			
+		// }
 		
 		
 

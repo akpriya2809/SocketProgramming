@@ -7,6 +7,7 @@
 #include<sys/socket.h>
 #include <netdb.h>
 #include <limits.h>
+#include <float.h>
 
 
 #define SERVERCPORT "32513" 
@@ -18,14 +19,18 @@
 float matrix[MAXROW][3];
 
 
-int minDistance(float dist[], int sptSet[], int V) 
+float minDistance(float dist[], int sptSet[], int V) 
 { 
     
-    int min = INT_MAX, min_index; 
-  
-    for (int v = 0; v < V; v++) 
-        if (sptSet[v] == 0 && dist[v] <= min) 
+    float min = FLT_MAX, min_index; 
+    
+    for (int v = 0; v < V; v++) {
+        if (sptSet[v] == 0 && dist[v] <= min) {
             min = dist[v], min_index = v; 
+        }
+    }
+        
+            
     return min_index; 
 } 
 
@@ -106,6 +111,7 @@ int main(){
         int i = 0, j=0;
 
         int max = 0;
+        //iterate to find the highest value of node in the matrix
         for(i = 0; i<info.len; i++){
             for(j = 0; j<2;j++){
                 int num  = (int)info.graph[i][j];
@@ -116,8 +122,12 @@ int main(){
             }
     
         }
+
+        //temp placeholder array with all the indices upto max+1 and initialize it to zero
         int temp[max + 1];
         memset(temp, 0, sizeof(temp));
+
+        //mark in  temp array with the nodes in graph as 1
         for(i = 0; i<info.len; i++){
             for(j = 0; j<2;j++){
                 if(temp[(int)info.graph[i][j]] != 1){
@@ -130,13 +140,17 @@ int main(){
         
         int t;
         int count = 1; 
+        //count the number of nodes in graph
         for(t = 0; t <= max;t++){
             if(temp[t]==1){
                 temp[t]= count++;
             }
         }
+        
 
         int V = count -1;
+
+        //create a map array and populate it with actual value of nodes in sequnce of incraesing order eg 5,6,8,12 is placed in array in same order with 5 at 0 index
         int mapArr [V];
         memset(mapArr, 0, sizeof(mapArr));
         int z =0;
@@ -147,7 +161,8 @@ int main(){
             }
             
         }
-
+        
+        //adjacency matrix
         float adjMatrix [V][V];
         memset(adjMatrix, 0.0, sizeof(adjMatrix));
 
@@ -160,32 +175,55 @@ int main(){
                 }
     
         }
-
-        float dist[V];
-        int sptSet[V];
-        int parent[V];
-        parent[0]=-1;
+        
+        // for(i=0; i<info.len;i++){
+        //     for(j=0;j<3;j++){
+        //         printf("%.2f\t", adjMatrix[i][j]);
+        //     }
+        //     printf("\n");
+        // }
+        float dist[V]; // stores the distance from source to every other node
+        int sptSet[V]; // makrs the visited node
+        int parent[V]; //tracks the parent of node
+       
 
         for (int i = 0; i < V; i++) {
-            dist[i] = INT_MAX, sptSet[i] = 0;
+            dist[i] = FLT_MAX, sptSet[i] = 0;
         }
         int src = atoi(info.src_index);
         dist[temp[src]-1] = 0.0;
+        parent[temp[src]-1] = -1;  // parent of source node in null
 
+        // for(i = 0 ;i<V;i++){
+        //    //printf("%d", parent[i]);
+        //    printf("%f\t", dist[i]);
+        // }
+        //    printf("\n");
+        printf("Line 202\n");
         for(i = 0; i < V-1; i++){
             int u = minDistance(dist, sptSet, V); 
             sptSet[u]=1;
+            
             for (int v = 0; v < V; v++) {
-
                 if (!sptSet[v] && adjMatrix[u][v] && dist[u] != INT_MAX 
                     && dist[u] + adjMatrix[u][v] < dist[v]) {
+                        
                     dist[v] = dist[u] + adjMatrix[u][v]; 
                     parent[v] = u;
+                    
+                    
                 }
             }
         }
-        
 
+        
+        // for(i = 0 ;i<V;i++){
+        //    //printf("%d", parent[i]);
+        //    printf("%f\t", dist[i]);
+        // }
+        //    printf("\n");
+     
+        printf("line 226\n");
         int dest = atoi(info.dest_index);
         int x = temp[dest]-1;
         int hops = 0;
@@ -194,6 +232,7 @@ int main(){
             x=parent[x];
 
         }
+        printf("Line 235\n");
         
         int path[hops+1];
         memset(path, -1, sizeof(path));

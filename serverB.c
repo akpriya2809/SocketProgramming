@@ -131,7 +131,7 @@ int main(){
         char buf[255];
         memset(buf, '0', strlen(buf));
         FILE *fp;
-        fp = fopen("text2.txt", "r");
+        fp = fopen("map2.txt", "r");
         int i = 0;
         
         while (1) {

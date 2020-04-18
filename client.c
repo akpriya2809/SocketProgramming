@@ -40,7 +40,6 @@ int main(int argc, char* argv[]){
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
-    printf("Before for loop in client. \n");
 
     for (p = servinfo; p != NULL; p = p->ai_next) {
         if ((socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol))
@@ -116,6 +115,7 @@ if (p == NULL) {
 				}
 			}
 	}else if(clientresult.mapIdErr[0] != '$'){
+		
 		printf("No map id %s was found\n", clientresult.mapIdErr);
 	}else {
 		printf("No vertex id %s was found\n", clientresult.vertexIdErr);
