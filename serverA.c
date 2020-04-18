@@ -80,7 +80,7 @@ int main(){
 	hints.ai_socktype = SOCK_DGRAM; 
 	hints.ai_flags = AI_PASSIVE;
 
-    if ((rv = getaddrinfo(HOST, SERVERAPORT, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(HOST, SERVERAPORT, &hints, &servinfo)) != 0) { // --beej tutorials
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 0;
 	}
@@ -128,7 +128,7 @@ int main(){
         char buf[255];
         memset(buf, '0', strlen(buf));
         FILE *fp;
-        fp = fopen("text.txt", "r");
+        fp = fopen("map1.txt", "r");
         int i = 0;
         
         while (1) {
@@ -138,7 +138,6 @@ int main(){
 
             if(compareLine(buf, map_id)) {
                 msg[0] = 'A';
-                printf("Line 141:");
                
                 fgets(val1, 15, fp);
 
@@ -151,7 +150,7 @@ int main(){
         
         fclose(fp);
 
-        
+        // --beej tutorials
         if ((numbytes = sendto(socket_fd, &msg, sizeof(val1), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");

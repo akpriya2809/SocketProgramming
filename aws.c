@@ -17,7 +17,7 @@
 #define PORTC "32513"
 #define MAXROW 50
 
-void *get_in_addr(struct sockaddr *sa)
+void *get_in_addr(struct sockaddr *sa) 
 {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
@@ -56,11 +56,12 @@ int main(int argc, char* argv[]){
 
     int rv;
 	int yes = 1;
-    if ((rv = getaddrinfo(HOST, TCPPORT, &hints, &servinfo)) != 0) {
+	int checkVertex = 1;
+    if ((rv = getaddrinfo(HOST, TCPPORT, &hints, &servinfo)) != 0) { // --beej tutorials
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
-    for (p = servinfo; p != NULL; p = p->ai_next) {
+    for (p = servinfo; p != NULL; p = p->ai_next) { // --beej tutorials
 		if ((socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol))
 				== -1) {
 			perror("server: socket");
@@ -183,12 +184,12 @@ int main(int argc, char* argv[]){
     while(1){
 		
         socklen_t addr_size = sizeof client_addr;
-        child_fd = accept(socket_fd, (struct sockaddr *) &client_addr, &addr_size);
+        child_fd = accept(socket_fd, (struct sockaddr *) &client_addr, &addr_size); // --beej tutorials
         if (child_fd == -1) {
 			perror("accept");			
 			exit(1);
 		}
-
+		// --beej tutorials
         inet_ntop(client_addr.ss_family, get_in_addr((struct sockaddr *) &client_addr), dest, sizeof dest);
 
 		struct sockaddr_in addrPeer;
@@ -221,6 +222,7 @@ int main(int argc, char* argv[]){
 		
 		//send map is to server A
 		int numbytes;
+		// --beej tutorials
 		if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,
 				 udp_A_p->ai_addr, udp_A_p->ai_addrlen)) == -1) {
 				perror("talker: sendto");
@@ -265,6 +267,7 @@ int main(int argc, char* argv[]){
 
 
 		udp_addr_len = sizeof udp_their_addr;
+		// --beej tutorials
 		if ((numbytes = recvfrom(udp_sockfd, &msg, sizeof(val1) , 0,			//wait for the incoming msg identifying the  server
 			(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
 				perror("recvfrom");
@@ -335,13 +338,14 @@ int main(int argc, char* argv[]){
 								exit(1);
 						}
 						
-
+						
 						
 						if(val1[0] == '0'){
 							// Map id was not found in either of servers so returning back  message to client
 							strcpy(clientresult.mapIdErr, map_id);
+							checkVertex = 0;
 							if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
-								perror("send:aws");
+								perror("send:awsasss");
 							}else{
 								close(child_fd);
 							}
@@ -356,142 +360,135 @@ int main(int argc, char* argv[]){
 				
 			}
 
-			printf("vertex::%d",vertex[0]);
-		
-		if(vertex[0] == 1 && vertex[1] == 1){
-							printf("The source and destination vertex are in the graph\n");
-							//send data to server C
-							struct Info{
-								char src_index[3];
-								char dest_index[3];
-								char prop_speed[150];
-								char trans_speed[150];
-								char map_id[2];
-								char fs[20];
-								int len;
-								float graph[MAXROW][3];
-							}info;
-							//remove trailing newline character from prop speed and trans speed
-							size_t ln1 = strlen(val1) - 1;
-							if (*val1 && val1[ln1] == '\n') 
-							val1[ln1] = '\0';
+		printf("\n");
+		if(checkVertex == 1){
+					if(vertex[0] == 1 && vertex[1] == 1){
+									printf("The source and destination vertex are in the graph\n");
+									//send data to server C
+									struct Info{
+										char src_index[3];
+										char dest_index[3];
+										char prop_speed[150];
+										char trans_speed[150];
+										char map_id[2];
+										char fs[20];
+										int len;
+										float graph[MAXROW][3];
+									}info;
+									//remove trailing newline character from prop speed and trans speed
+									size_t ln1 = strlen(val1) - 1;
+									if (*val1 && val1[ln1] == '\n') 
+									val1[ln1] = '\0';
 
-							size_t ln2 = strlen(val2) - 1;
-							if (*val2 && val2[ln2] == '\n') 
-							val2[ln2] = '\0';
+									size_t ln2 = strlen(val2) - 1;
+									if (*val2 && val2[ln2] == '\n') 
+									val2[ln2] = '\0';
 
-							//copying necessary details inside info struct to be passed to Server C
-							strcpy(info.src_index, src_vertex_index);
-							strcpy(info.dest_index, dest_vertex_index);
-							strcpy(info.prop_speed, val1);
-							strcpy(info.trans_speed, val2);
-							strcpy(info.map_id, map_id);
-							strcpy(info.fs, file_size);
-							info.len = lenOfMatrix;
-							int j,k;
-							for(j =0; j<len;j++){
-								for(k=0;k<3;k++){
-									info.graph[j][k] = matrix[j][k];
+									//copying necessary details inside info struct to be passed to Server C
+									strcpy(info.src_index, src_vertex_index);
+									strcpy(info.dest_index, dest_vertex_index);
+									strcpy(info.prop_speed, val1);
+									strcpy(info.trans_speed, val2);
+									strcpy(info.map_id, map_id);
+									strcpy(info.fs, file_size);
+									info.len = lenOfMatrix;
+									int j,k;
+									for(j =0; j<len;j++){
+										for(k=0;k<3;k++){
+											info.graph[j][k] = matrix[j][k];
+										}
+									}
+									
+									// send over UDP to server C
+									if ((numbytes = sendto(udp_sockfd, &info, sizeof info, 0,	// --beej tutorials
+										udp_C_p->ai_addr, udp_C_p->ai_addrlen)) == -1) {
+										perror("talker: sendto");
+										exit(1);
+									}
+								printf("The AWS sent map, source ID, destination ID, propagation speed and transmission speed to Server C using UDP over port %s\n", UDPPORT);
+
+								//creating a place holder to store valueswhen returned by Server C
+								struct Result{
+										int shortest_path[3];
+										int pathlen;
+										float shortest_dist;
+										char prop_speed[150];
+										char trans_speed[150];
+									}result;
+								memset(result.shortest_path, 0 , sizeof(result.shortest_path));
+								memset(result.prop_speed, '0', sizeof(result.prop_speed));
+								memset(result.trans_speed,'0', sizeof(result.trans_speed));
+								result.pathlen = 0;
+								result.shortest_dist = 0.0;
+
+								
+								// wait for incoming packets
+								if ((numbytes = recvfrom(udp_sockfd, &result, sizeof(result) , 0,			//wait for the incoming packets
+										(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
+											perror("recvfrom");
+											exit(1);
 								}
-							}
-							
-							// send over UDP to server C
-							if ((numbytes = sendto(udp_sockfd, &info, sizeof info, 0,	
-								udp_C_p->ai_addr, udp_C_p->ai_addrlen)) == -1) {
-								perror("talker: sendto");
-								exit(1);
-							}
-						printf("The AWS sent map, source ID, destination ID, propagation speed and transmission speed to Server C using UDP over port %s\n", UDPPORT);
+								
+								printf("The AWS has received results from server C:\n");
+								printf("Shortest Path:");
+								int i;
+								for(i = 0; i<result.pathlen; i++){
+									if(i== result.pathlen-1){
+										printf("%d", result.shortest_path[i]);
+									}else{
+										printf("%d -- ", result.shortest_path[i]);
+									}
+									
+									if(i == result.pathlen -2){
+										printf("\n");
+									}
+								}
+								printf("\n\tShortest distance:%.2f km\n", result.shortest_dist);
+								printf("\tTransmission Delay: %s s\n", result.trans_speed);
+								printf("\tPropagation Delay: %s s\n", result.prop_speed);
 
-						//creating a place holder to store valueswhen returned by Server C
-						struct Result{
-								int shortest_path[3];
-								int pathlen;
-								float shortest_dist;
-								char prop_speed[150];
-								char trans_speed[150];
-							}result;
-						memset(result.shortest_path, 0 , sizeof(result.shortest_path));
-						memset(result.prop_speed, '0', sizeof(result.prop_speed));
-						memset(result.trans_speed,'0', sizeof(result.trans_speed));
-						result.pathlen = 0;
-						result.shortest_dist = 0.0;
+								//copying the value from result to clientresult to send the final results to client
+								memcpy(clientresult.shortest_path,result.shortest_path, sizeof(result.shortest_path));
+								clientresult.pathlen = result.pathlen;
+								clientresult.shortest_dist = result.shortest_dist;
+								strcpy(clientresult.prop_speed, result.prop_speed);
+								strcpy(clientresult.trans_speed, result.trans_speed);
+								memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
+								memset(clientresult.vertexIdErr ,'$', sizeof(clientresult.vertexIdErr));
 
-						
-						// wait for incoming packets
-						if ((numbytes = recvfrom(udp_sockfd, &result, sizeof(result) , 0,			//wait for the incoming packets
-								(struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) {
-									perror("recvfrom");
-									exit(1);
-						}
-						
-						printf("The AWS has received results from server C:\n");
-						printf("Shortest Path:");
-						int i;
-						for(i = 0; i<result.pathlen; i++){
-							if(i== result.pathlen-1){
-								printf("%d", result.shortest_path[i]);
-							}else{
-								printf("%d -- ", result.shortest_path[i]);
-							}
-							
-							if(i == result.pathlen -2){
-								printf("\n");
-							}
-						}
-						printf("\n\tShortest distance:%.2f km\n", result.shortest_dist);
-						printf("\tTransmission Delay: %s s\n", result.trans_speed);
-						printf("\tPropagation Delay: %s s\n", result.prop_speed);
+								// send the calculated results to client
+								
+								if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
+									perror("send:aws");
+								}else{
+									printf("The AWS has sent calculated results to client using TCP over port %s\n", TCPPORT);
+									close(child_fd);
+											
+								}
+				}else if(vertex[0]==0){
 
-						//copying the value from result to clientresult to send the final results to client
-						memcpy(clientresult.shortest_path,result.shortest_path, sizeof(result.shortest_path));
-						clientresult.pathlen = result.pathlen;
-						clientresult.shortest_dist = result.shortest_dist;
-						strcpy(clientresult.prop_speed, result.prop_speed);
-						strcpy(clientresult.trans_speed, result.trans_speed);
-						memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
-						memset(clientresult.vertexIdErr ,'$', sizeof(clientresult.vertexIdErr));
-
-						// send the calculated results to client
-						if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
+					printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d\n", src_vertex_index, client_port);
+					strcpy(clientresult.vertexIdErr ,src_vertex_index);
+					memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
+					
+					if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
 							perror("send:aws");
 						}else{
-							printf("The AWS has sent calculated results to client using TCP over port %s\n", TCPPORT);
 							close(child_fd);
-									
+							
 						}
-		}else if(vertex[0]==0){
-
-			printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d", src_vertex_index, client_port);
-			strcpy(clientresult.vertexIdErr ,src_vertex_index);
-			memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
-			if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
-					perror("send:aws");
-				}else{
-					close(child_fd);
-					//exit(0);
-					
-				}
-		}else {
-			strcpy(clientresult.vertexIdErr,dest_vertex_index);
-			memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
-			printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d", dest_vertex_index, client_port);
-			if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
-					perror("send:aws");
-				}else{
-					close(child_fd);
-					//exit(0);
-					
+				}else {
+					strcpy(clientresult.vertexIdErr,dest_vertex_index);
+					memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
+					printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d", dest_vertex_index, client_port);
+					if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
+							perror("send:aws");
+						}else{
+							close(child_fd);
+							
+						}
 				}
 		}
-		// else{
-		// 	printf("The source and destination vertex are not found in the graph, sending error to client using TCP over PORT %d", client_port);
-		// 	//send message to client
-			
-		// }
-		
-		
-
 
     }
 

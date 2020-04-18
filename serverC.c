@@ -48,11 +48,11 @@ int main(){
 	hints.ai_socktype = SOCK_DGRAM; 
 	hints.ai_flags = AI_PASSIVE;
 
-    if ((rv = getaddrinfo(HOST, SERVERCPORT, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(HOST, SERVERCPORT, &hints, &servinfo)) != 0) { // --beej tutorials
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 0;
 	}
-    for (p = servinfo; p != NULL; p = p->ai_next) {
+    for (p = servinfo; p != NULL; p = p->ai_next) { // --beej tutorials
 		if ((socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol))
 				== -1) {
 			perror("serverC: socket");
@@ -162,7 +162,7 @@ int main(){
             
         }
         
-        //adjacency matrix
+        //adjacency matrix 
         float adjMatrix [V][V];
         memset(adjMatrix, 0.0, sizeof(adjMatrix));
 
@@ -176,12 +176,6 @@ int main(){
     
         }
         
-        // for(i=0; i<info.len;i++){
-        //     for(j=0;j<3;j++){
-        //         printf("%.2f\t", adjMatrix[i][j]);
-        //     }
-        //     printf("\n");
-        // }
         float dist[V]; // stores the distance from source to every other node
         int sptSet[V]; // makrs the visited node
         int parent[V]; //tracks the parent of node
@@ -194,18 +188,12 @@ int main(){
         dist[temp[src]-1] = 0.0;
         parent[temp[src]-1] = -1;  // parent of source node in null
 
-        // for(i = 0 ;i<V;i++){
-        //    //printf("%d", parent[i]);
-        //    printf("%f\t", dist[i]);
-        // }
-        //    printf("\n");
-        printf("Line 202\n");
         for(i = 0; i < V-1; i++){
-            int u = minDistance(dist, sptSet, V); 
+            int u = minDistance(dist, sptSet, V); //---picked up fromm geeks for geeks
             sptSet[u]=1;
             
             for (int v = 0; v < V; v++) {
-                if (!sptSet[v] && adjMatrix[u][v] && dist[u] != INT_MAX 
+                if (!sptSet[v] && adjMatrix[u][v] && dist[u] != FLT_MAX 
                     && dist[u] + adjMatrix[u][v] < dist[v]) {
                         
                     dist[v] = dist[u] + adjMatrix[u][v]; 
@@ -216,23 +204,16 @@ int main(){
             }
         }
 
-        
-        // for(i = 0 ;i<V;i++){
-        //    //printf("%d", parent[i]);
-        //    printf("%f\t", dist[i]);
-        // }
-        //    printf("\n");
-     
-        printf("line 226\n");
         int dest = atoi(info.dest_index);
         int x = temp[dest]-1;
         int hops = 0;
+        // count the number of hops
         while(parent[x]!=-1){
             hops++;
             x=parent[x];
 
         }
-        printf("Line 235\n");
+        
         
         int path[hops+1];
         memset(path, -1, sizeof(path));
@@ -240,6 +221,7 @@ int main(){
         int p =0;
         x = temp[dest]-1;
        
+       //populate the path
         while(parent[x]!=-1){
             path[p++] = mapArr[x];
             x=parent[x];
@@ -249,6 +231,7 @@ int main(){
         path[p] = mapArr[x];
         int k = hops;
         i = 0;
+        //reveres the array from src to dest
         while(i<k){
             int temp = path[i];
             path[i]= path[k];
@@ -295,8 +278,8 @@ int main(){
         strcpy(result.prop_speed, info.prop_speed);
         strcpy(result.trans_speed, info.trans_speed);
         
-
-        if ((numbytes = sendto(socket_fd, &result, sizeof(result), 0,	// send to UDP server, the address is assigned in getaddrinfo function above
+        //send resukt back to aws
+        if ((numbytes = sendto(socket_fd, &result, sizeof(result), 0,	// send to UDP server, the address is assigned in getaddrinfo function 
 				 (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");
 			exit(1);

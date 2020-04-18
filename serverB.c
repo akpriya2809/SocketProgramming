@@ -79,12 +79,12 @@ int main(){
 	hints.ai_socktype = SOCK_DGRAM; 
 	hints.ai_flags = AI_PASSIVE;
 
-    if ((rv = getaddrinfo(HOST, SERVERBPORT, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(HOST, SERVERBPORT, &hints, &servinfo)) != 0) { // --beej tutorials
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 0;
 	}
     for (p = servinfo; p != NULL; p = p->ai_next) {
-		if ((socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol))
+		if ((socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) // --beej tutorials
 				== -1) {
 			perror("serverB: socket");
 			continue;
@@ -152,7 +152,7 @@ int main(){
         } 
         
         fclose(fp);
-
+        // --beej tutorials
         if ((numbytes = sendto(socket_fd, &msg, sizeof(msg), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");

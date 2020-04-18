@@ -114,6 +114,7 @@ if (p == NULL) {
 					printf("%d -- ", clientresult.shortest_path[i]);
 				}
 			}
+			printf("\n");
 	}else if(clientresult.mapIdErr[0] != '$'){
 		
 		printf("No map id %s was found\n", clientresult.mapIdErr);
