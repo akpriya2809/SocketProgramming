@@ -250,10 +250,6 @@ int main(){
             }else{
                 printf("%d -- ", path[i]);
             }
-            
-            if(i == total -2){
-                printf("\n");
-            }
         }
         printf("\n");
         printf("Shortest Distance:%.2f km\n", dist[temp[dest]-1] );

@@ -56,7 +56,7 @@ int main(int argc, char* argv[]){
 
     int rv;
 	int yes = 1;
-	int checkVertex = 1;
+	
     if ((rv = getaddrinfo(HOST, TCPPORT, &hints, &servinfo)) != 0) { // --beej tutorials
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
@@ -182,7 +182,7 @@ int main(int argc, char* argv[]){
     printf("The AWS is up and running.\n");
 
     while(1){
-		
+		int checkVertex = 1;
         socklen_t addr_size = sizeof client_addr;
         child_fd = accept(socket_fd, (struct sockaddr *) &client_addr, &addr_size); // --beej tutorials
         if (child_fd == -1) {
@@ -218,7 +218,7 @@ int main(int argc, char* argv[]){
 		recv(child_fd, dest_vertex_index, sizeof dest_vertex_index, 0);	
 		recv(child_fd, file_size, sizeof file_size, 0);	
 
-		printf("The AWS has received mapID %s , start vertex %s, destination vertex %s and file size %s from the client using TCP over port %s. \n", map_id, src_vertex_index, dest_vertex_index, file_size, TCPPORT);
+		printf("The AWS has received mapID %s, start vertex %s, destination vertex %s and file size %s from the client using TCP over port %s. \n", map_id, src_vertex_index, dest_vertex_index, file_size, TCPPORT);
 		
 		//send map is to server A
 		int numbytes;
@@ -298,7 +298,7 @@ int main(int argc, char* argv[]){
 				exit(1);
 		}
 		
-		
+		//printf("LIne 301 aws: %s", val1);
 		if(val1[0] == '0'){ // check if map was found in from map1.txt via server A
 						printf("Not found from server A \n");
 						//send to server B
@@ -339,13 +339,13 @@ int main(int argc, char* argv[]){
 						}
 						
 						
-						
+						//printf("Line 342:%c", val1[0]);
 						if(val1[0] == '0'){
 							// Map id was not found in either of servers so returning back  message to client
 							strcpy(clientresult.mapIdErr, map_id);
 							checkVertex = 0;
 							if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
-								perror("send:awsasss");
+								perror("send:aws");
 							}else{
 								close(child_fd);
 							}
@@ -360,7 +360,7 @@ int main(int argc, char* argv[]){
 				
 			}
 
-		printf("\n");
+		
 		if(checkVertex == 1){
 					if(vertex[0] == 1 && vertex[1] == 1){
 									printf("The source and destination vertex are in the graph\n");
@@ -437,10 +437,6 @@ int main(int argc, char* argv[]){
 										printf("%d", result.shortest_path[i]);
 									}else{
 										printf("%d -- ", result.shortest_path[i]);
-									}
-									
-									if(i == result.pathlen -2){
-										printf("\n");
 									}
 								}
 								printf("\n\tShortest distance:%.2f km\n", result.shortest_dist);

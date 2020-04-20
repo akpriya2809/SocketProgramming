@@ -163,6 +163,7 @@ int main(){
 			perror("senderr: sendto");
 			exit(1);
 		}
+        
         if ((numbytes = sendto(socket_fd, &val1, sizeof(val1), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {
 			perror("senderr: sendto");
