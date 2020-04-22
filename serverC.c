@@ -122,12 +122,13 @@ int main(){
             }
     
         }
+        
 
         //temp placeholder array with all the indices upto max+1 and initialize it to zero
         int temp[max + 1];
         memset(temp, 0, sizeof(temp));
-
-        //mark in  temp array with the nodes in graph as 1
+        
+        //mark in temp array with the nodes in graph as 1
         for(i = 0; i<info.len; i++){
             for(j = 0; j<2;j++){
                 if(temp[(int)info.graph[i][j]] != 1){
@@ -147,7 +148,6 @@ int main(){
             }
         }
         
-
         int V = count -1;
 
         //create a map array and populate it with actual value of nodes in sequnce of incraesing order eg 5,6,8,12 is placed in array in same order with 5 at 0 index
@@ -203,6 +203,7 @@ int main(){
                 }
             }
         }
+
 
         int dest = atoi(info.dest_index);
         int x = temp[dest]-1;

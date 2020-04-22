@@ -174,6 +174,8 @@ int main(){
 			perror("senderr: sendto");
 			exit(1);
 		}
+
+    
         
         if ((numbytes = sendto(socket_fd, &matrix, sizeof(matrix), 0,	
             (struct sockaddr *)&server_addr, addr_len)) == -1) {

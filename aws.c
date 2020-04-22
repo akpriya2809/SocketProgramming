@@ -199,7 +199,6 @@ int main(int argc, char* argv[]){
 		if(peerRv == 1){
 			perror("getpeername");
 		}
-		int client_port = addrPeer.sin_port;
 
 		char map_id[2];
 		memset(map_id, '0', sizeof(map_id));
@@ -462,7 +461,7 @@ int main(int argc, char* argv[]){
 								}
 				}else if(vertex[0]==0){
 
-					printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d\n", src_vertex_index, client_port);
+					printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %s\n", src_vertex_index, TCPPORT);
 					strcpy(clientresult.vertexIdErr ,src_vertex_index);
 					memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
 					
@@ -475,7 +474,7 @@ int main(int argc, char* argv[]){
 				}else {
 					strcpy(clientresult.vertexIdErr,dest_vertex_index);
 					memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
-					printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %d", dest_vertex_index, client_port);
+					printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %s", dest_vertex_index, TCPPORT);
 					if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
 							perror("send:aws");
 						}else{
