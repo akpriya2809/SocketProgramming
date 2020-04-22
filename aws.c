@@ -298,10 +298,11 @@ int main(int argc, char* argv[]){
 				exit(1);
 		}
 		
-		//printf("LIne 301 aws: %s", val1);
+		
 		if(val1[0] == '0'){ // check if map was found in from map1.txt via server A
 						printf("Not found from server A \n");
 						//send to server B
+						
 						if ((numbytes = sendto(udp_sockfd, &map_id, sizeof map_id, 0,	// send to UDP server, the address is assigned in getaddrinfo function above
 							udp_B_p->ai_addr, udp_B_p->ai_addrlen)) == -1) {
 							perror("talker: sendto");
@@ -337,9 +338,7 @@ int main(int argc, char* argv[]){
 								perror("recvfrom");
 								exit(1);
 						}
-						
-						
-						//printf("Line 342:%c", val1[0]);
+
 						if(val1[0] == '0'){
 							// Map id was not found in either of servers so returning back  message to client
 							strcpy(clientresult.mapIdErr, map_id);
@@ -393,7 +392,7 @@ int main(int argc, char* argv[]){
 									strcpy(info.fs, file_size);
 									info.len = lenOfMatrix;
 									int j,k;
-									for(j =0; j<len;j++){
+									for(j =0; j<lenOfMatrix;j++){
 										for(k=0;k<3;k++){
 											info.graph[j][k] = matrix[j][k];
 										}
