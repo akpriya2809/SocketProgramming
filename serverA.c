@@ -58,6 +58,8 @@ void readValues(FILE *fp){
                 len = i;
 
             }
+        }else{
+            break;
         }
 
 

@@ -21,8 +21,8 @@ int compareLine(char* str, char* in) {
     int result = 0;
     if(str[0] == in[0]) {
         result = 1;
+        
     }
-
     return result;
 }
 
@@ -30,7 +30,6 @@ void readValues(FILE *fp){
     
     char line[150];
     int i = 0;
-    
     while(1){
         if(fgets(line, 150, fp)){
             char *token_line;
@@ -38,7 +37,7 @@ void readValues(FILE *fp){
 
             token_line = strtok(line, delimiter);
 
-            if(strlen(token_line)==1) {
+            if(strlen(token_line)==1 ) {
                 break;
             }
             else {
@@ -57,9 +56,9 @@ void readValues(FILE *fp){
                 len = i;
 
             }
+        }else{
+            break;
         }
-
-
     }
    
     
@@ -138,7 +137,7 @@ int main(){
             if (fgets(buf,150, fp) == NULL) 
                 break; 
            
-
+            
             if(compareLine(buf, map_id)) {
                 msg[0] = 'B';
                
@@ -174,7 +173,7 @@ int main(){
 			perror("senderr: sendto");
 			exit(1);
 		}
-
+        
     
         
         if ((numbytes = sendto(socket_fd, &matrix, sizeof(matrix), 0,	
