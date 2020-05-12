@@ -430,6 +430,7 @@ int main(int argc, char* argv[]){
 								printf("The AWS has received results from server C:\n");
 								printf("Shortest Path:");
 								int i;
+								
 								for(i = 0; i<result.pathlen; i++){
 									if(i== result.pathlen-1){
 										printf("%d", result.shortest_path[i]);
@@ -460,7 +461,7 @@ int main(int argc, char* argv[]){
 											
 								}
 				}else if(vertex[0]==0){
-
+					
 					printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %s\n", src_vertex_index, TCPPORT);
 					strcpy(clientresult.vertexIdErr ,src_vertex_index);
 					memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
@@ -472,9 +473,10 @@ int main(int argc, char* argv[]){
 							
 						}
 				}else {
+					
 					strcpy(clientresult.vertexIdErr,dest_vertex_index);
 					memset(clientresult.mapIdErr ,'$', sizeof(clientresult.mapIdErr));
-					printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %s", dest_vertex_index, TCPPORT);
+					printf("%s vertex not found in the graph, sending error to client using TCP over port AWS %s\n", dest_vertex_index, TCPPORT);
 					if(send(child_fd, &clientresult, sizeof(clientresult), 0 )== -1){
 							perror("send:aws");
 						}else{

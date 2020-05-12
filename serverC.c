@@ -269,12 +269,24 @@ int main(){
         memset(result.trans_speed,'0', sizeof(result.trans_speed));
         
         result.pathlen = total;
+        
         result.shortest_dist = dist[temp[dest]-1];
 
         memcpy(result.shortest_path, path, sizeof(path));
-        strcpy(result.prop_speed, info.prop_speed);
-        strcpy(result.trans_speed, info.trans_speed);
         
+
+        float prop_delay = result.shortest_dist/atof(info.prop_speed);
+        float trans_delay = atof(info.fs)/atof(info.trans_speed);
+
+        snprintf(result.prop_speed, sizeof(result.prop_speed), "%.2f", prop_delay);
+        snprintf(result.trans_speed, sizeof(result.trans_speed), "%.2f", trans_delay);
+
+        result.pathlen = total;
+        
+        printf("Shortest Distance:%.2f km\n", result.shortest_dist);
+        printf("Transmission delay: %s s\n", result.trans_speed);
+        printf("Propagation delay: %s s\n", result.prop_speed);
+
         //send resukt back to aws
         if ((numbytes = sendto(socket_fd, &result, sizeof(result), 0,	// send to UDP server, the address is assigned in getaddrinfo function 
 				 (struct sockaddr *)&server_addr, addr_len)) == -1) {
